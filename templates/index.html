@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% block title %}
+Face
+{% endblock title %}
+{% block body %}
+<div class="container my-3">
+  <h1>
+    Users Data Of Face Recog
+  </h1>
+</div>
+</br>
+<div class="container my-3">
+    <form class="row g-3" action="/" method="POST">
+      <div class="col-auto">
+        <input type="text" class="form-control" id="name" name="name" value=""  placeholder="Search name">
+      </div>
+      <div class="col-auto">
+        <button type="submit" class="btn btn-dark">Search Name</button>
+        
+      </div>
+    </form>
+</div>
+
+<div class="container my-3">
+  <form class="row g-3" action = "/" method = "POST" enctype = "multipart/form-data">
+    <!-- <h3>Add a picture of person to locate</h3>
+    <input type = "file" name = "newcomer" accept="image/*" /><br>
+    <input type = "submit" value = "submit" /><br> -->
+    <div class="col-auto">
+    <input type = "file" class="form-control"  name = "newcomer" id="newcomer" accept="image/*" /><br>
+  </div>
+    <div class="col-auto">
+      <button type="submit" class="btn btn-dark">Search Image</button>
+  </div>
+  </form>
+</div>
+
+</br>
+<div class="container my-3">
+  <form action="/">
+  <button type="submit" class="btn btn-dark">Refresh</button>
+  </form>
+</div>
+
+
+<div class="container my-3">
+  {% if allTodo|length==0 %}
+  <div class="alert alert-dark" role="alert">
+    No Records found.
+  </div>
+  {% else %}
+  <table class="table">
+    <thead>
+      <tr>
+        <th scope="col">SNo</th>
+        <th scope="col">IMG</th>
+        <th scope="col">Name</th>
+        <!-- <th scope="col">ID</th> -->
+        <th scope="col">Recent Time</th>
+        <th scope="col">Recent Location</th>
+        <th scope="col">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for todo in allTodo %}
+      <tr>
+        <th scope="row">{{loop.index}}</th>
+        {% set testing = todo.imgUrl %}
+        <td><img src="{{ testing }}" id="img" alt="Red dot" width="100" height="100" /></td>
+        <td>{{todo.id}}</td>
+        <td>{{todo.recentTime}}</td>
+        <td>{{todo.recentLocation}}</td>
+        <td>
+          <a href="/details/{{todo.id}}" type="button" class="btn btn-outline-dark btn-sm mx-1">Show Details</button>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% endif %}
+
+
+
+
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"
+  integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3" crossorigin="anonymous"></script>
+
+{% endblock body %}

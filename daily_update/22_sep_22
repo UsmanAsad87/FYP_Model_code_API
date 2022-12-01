@@ -1,0 +1,86 @@
+ DeepFace.stream(db_path = 'dataset2', model_name ='ArcFace', detector_backend = 'mtcnn', distance_metric = 'cosine', enable_face_analysis = True, source = 0, time_threshold = 5, frame_threshold = 1)
+
+df = DeepFace.find(img_path = "img200.jpg", db_path = "/home/all/deepface/tests/dataset",model_name ="ArcFace",detector_backend ="mtcnn")
+df.nsmallest(1, 'ArcFace_cosine')
+
+embedding = DeepFace.represent(img_path = "img100.jpg")
+
+
+
+img = functions.preprocess_face(img = 'img1.jpg', target_size=(224, 224), enforce_detection = False, detector_backend = 'mtcnn', align = True)
+face = DeepFace.detectFace(img_path = "img1.jpg", target_size = (224, 224), detector_backend = 'mtcnn')
+
+from deepface.commons import functions
+
+//For getting the face from the image and saving it in a Directory
+>>> face = DeepFace.detectFace(img_path = "img3.jpg", target_size = (224, 224))
+>>> import matplotlib.image
+>>> matplotlib.image.imsave('name.png', face)
+>>> matplotlib.image.imsave('dataset2/name.png', face)
+
+
+
+
+//For getting the no.of files in the path
+import os
+
+def fcount(path):
+    count1 = 0
+    for root, dirs, files in os.walk(path):
+            count1 += len(dirs)
+    return count1
+
+path = "dataset2/"
+print fcount(path)
+
+//For creating the new directory
+count=fcount(path)
+newpath = 'dataset2/ID'+str(count)  
+if not os.path.exists(newpath):
+    os.makedirs(newpath)
+
+
+//For saving the image in the directory
+matplotlib.image.imsave('dataset2/ID'+str(count)+'/image'+str(count)+'.png', face)
+
+
+
+
+file_name="representations_arcface.pkl"
+db_path='dataset_small'
+if path.exists(db_path+"/"+file_name):
+
+			if not silent: print("WARNING: Representations for images in ",db_path," folder were previously stored in ", file_name, ". If you added new instances after this file creation, then please delete this file and call find function again. It will create it again.")
+
+			f = open(db_path+'/'+file_name, 'rb')
+			representations = pickle.load(f)
+
+			if not silent: print("There are ", len(representations)," representations found in ",file_name)
+
+
+
+file_name="representations_arcface.pkl"
+db_path='dataset_small'
+f = open(db_path+'/'+file_name, 'rb')
+representations = pickle.load(f)
+
+"dataset_small\ID17/image17.jpg"
+f = open(db_path+'/'+file_name, "wb")
+pickle.dump(representations, f)
+f.close()
+
+
+
+file_name="representations_arcface.pkl"
+db_path='dataset_small'
+f = open(db_path+'/'+file_name, 'rb')
+representations = pickle.load(f)
+img_path="dataset_small/ID17/image17.png"
+rep= DeepFace.represent(img_path,model_name="ArcFace",detector_backend = 'mtcnn')
+instance=[]
+instance.append(img_path)
+instance.append(rep)
+representations.append(instance)
+f = open(db_path+'/'+file_name, "wb")
+pickle.dump(representations, f)
+f.close()
