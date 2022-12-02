@@ -20,17 +20,20 @@ import pickle
 from deepface.commons import functions
 import pymongo
 import base64
+import numpy as np
 from datetime import datetime
-from mtcnn.mtcnn import MTCNN
-import cv2
+
+
+
+# from mtcnn.mtcnn import MTCNN
+# import cv2
+# detector =MTCNN()
 
 
 
 from flask import redirect,url_for ,render_template
 
 
-
-detector =MTCNN()
 
 #------------------------------
 
@@ -290,93 +293,93 @@ def searchByImg(img):
 		# 	print(st.time)
 		# return render_template('index.html',allTodo=Docs)
 
-def searchByName(name):
-	#if search query is empty
-	if(name==''):
-		return getAllUser()
+# def searchByName(name):
+# 	#if search query is empty
+# 	if(name==''):
+# 		return getAllUser()
 	
-	#if no user is found then this will run
-	user=collection.find_one({"name":name})
-	if(user==None):
-		return render_template('index.html',allTodo=[])
+# 	#if no user is found then this will run
+# 	user=collection.find_one({"name":name})
+# 	if(user==None):
+# 		return render_template('index.html',allTodo=[])
 
-	#if user record is found	
-	Docs=[]	
-	stamps=[]
-	for item in user['timeStamps']:
-		stamp=TimeStamp(item)
-		stamps.append(stamp)
-		print("DATA: "+stamp.location+" "+stamp.time+"  ")
-	userData= User(user,stamps)
-	Docs.append(userData)
-	for st in userData.timeStamps:
-		print(st.time)
-	return render_template('index.html',allTodo=Docs)
-
-
+# 	#if user record is found	
+# 	Docs=[]	
+# 	stamps=[]
+# 	for item in user['timeStamps']:
+# 		stamp=TimeStamp(item)
+# 		stamps.append(stamp)
+# 		print("DATA: "+stamp.location+" "+stamp.time+"  ")
+# 	userData= User(user,stamps)
+# 	Docs.append(userData)
+# 	for st in userData.timeStamps:
+# 		print(st.time)
+# 	return render_template('index.html',allTodo=Docs)
 
 
 
-# @app.route('/view')
-# def view():
-# 	allDocs=collection.find({},{"name":1,"_id":0,'recent_location':1,'recent_timeStamp':1,'timeStamps':1}).sort('recent_timeStamp',-1).limit(2)
-# 	for item in allDocs:
-# 		#print(item)
-# 		print("DATA:")
-# 		print(item['name'])
-# 		print(item['recent_location'])
-# 		a=item['recent_timeStamp']
-# 		print("year =", a.year)
-# 		print("month =", a.month)
-# 		print("day =", a.day)
-# 		print("hour =", a.hour)
-# 		print("minute =", a.minute)
-# 		for stamps in item['timeStamps']: 
-# 			print(stamps)
-# 			m=stamps['time']
-# 			print("year =", m.year)
-# 			print("month =", m.month)
-# 			print("day =", m.day)
-# 			print("hour =", m.hour)
-# 			print("minute =", m.minute)
+
+
+# # @app.route('/view')
+# # def view():
+# # 	allDocs=collection.find({},{"name":1,"_id":0,'recent_location':1,'recent_timeStamp':1,'timeStamps':1}).sort('recent_timeStamp',-1).limit(2)
+# # 	for item in allDocs:
+# # 		#print(item)
+# # 		print("DATA:")
+# # 		print(item['name'])
+# # 		print(item['recent_location'])
+# # 		a=item['recent_timeStamp']
+# # 		print("year =", a.year)
+# # 		print("month =", a.month)
+# # 		print("day =", a.day)
+# # 		print("hour =", a.hour)
+# # 		print("minute =", a.minute)
+# # 		for stamps in item['timeStamps']: 
+# # 			print(stamps)
+# # 			m=stamps['time']
+# # 			print("year =", m.year)
+# # 			print("month =", m.month)
+# # 			print("day =", m.day)
+# # 			print("hour =", m.hour)
+# # 			print("minute =", m.minute)
 		
 
-	# for item in allDocs:
-	# 	if  not ('none' in item["recent_timeStamp"]):
-	# 		print(item)
-	# for item in allDocs:
-	# 	if 'none' in item["recent_timeStamp"]:
-	# 		print(item)
-	return '<h1>Welcome to our face recognizer!</h1>'
-# @app.route('/1')
-# def welcome1():
-#     return render_template('index.html')
+# 	# for item in allDocs:
+# 	# 	if  not ('none' in item["recent_timeStamp"]):
+# 	# 		print(item)
+# 	# for item in allDocs:
+# 	# 	if 'none' in item["recent_timeStamp"]:
+# 	# 		print(item)
+# 	return '<h1>Welcome to our face recognizer!</h1>'
+# # @app.route('/1')
+# # def welcome1():
+# #     return render_template('index.html')
 
 
 
 
 
-def loadBase64Img(uri):
-   encoded_data = uri.split(',')[1]
-   nparr = np.fromstring(base64.b64decode(encoded_data), np.uint8)
-   img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-   return img
+# def loadBase64Img(uri):
+#    encoded_data = uri.split(',')[1]
+#    nparr = np.fromstring(base64.b64decode(encoded_data), np.uint8)
+#    img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+#    return img
 
-def extract_face(image, resize=(224, 224)):
-   faces = detector.detect_faces(image)
-   facesInb64=[]
-   for face in faces:
-    x1, y1, width, height = face['box']
-    x2, y2 = x1 + width, y1 + height
-    face_boundary = image[y1:y2, x1:x2]
-    face_image=cv2.resize(face_boundary,resize)
+# def extract_face(image, resize=(224, 224)):
+#    faces = detector.detect_faces(image)
+#    facesInb64=[]
+#    for face in faces:
+#     x1, y1, width, height = face['box']
+#     x2, y2 = x1 + width, y1 + height
+#     face_boundary = image[y1:y2, x1:x2]
+#     face_image=cv2.resize(face_boundary,resize)
 
-    res, frame = cv2.imencode('.jpg', face_image)   
-    b64 = base64.b64encode(frame) 
-    img = "data:image/jpeg;base64," + b64.decode('utf-8')
-    facesInb64.append(img)
+#     res, frame = cv2.imencode('.jpg', face_image)   
+#     b64 = base64.b64encode(frame) 
+#     img = "data:image/jpeg;base64," + b64.decode('utf-8')
+#     facesInb64.append(img)
 
-   return facesInb64
+#    return facesInb64
 
 
 
@@ -425,10 +428,10 @@ def findfaceWrapper(req, trx_id = 0):
 	resultDf=pd.DataFrame()
 
 	#Just to check
-	img2=loadBase64Img(img)
-	face_imgs=extract_face(img2)
-	for i in face_imgs:
-		print(len(i))
+	# img2=loadBase64Img(img)
+	# face_imgs=extract_face(img2)
+	# for i in face_imgs:
+	# 	print(len(i))
 	#-----------------------
 
 
