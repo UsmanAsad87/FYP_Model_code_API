@@ -25,9 +25,9 @@ from datetime import datetime
 
 
 
-# from mtcnn.mtcnn import MTCNN
-# import cv2
-# detector =MTCNN()
+from mtcnn.mtcnn import MTCNN
+import cv2
+detector =MTCNN()
 
 
 
@@ -359,27 +359,27 @@ def searchByImg(img):
 
 
 
-# def loadBase64Img(uri):
-#    encoded_data = uri.split(',')[1]
-#    nparr = np.fromstring(base64.b64decode(encoded_data), np.uint8)
-#    img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-#    return img
+def loadBase64Img(uri):
+   encoded_data = uri.split(',')[1]
+   nparr = np.fromstring(base64.b64decode(encoded_data), np.uint8)
+   img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+   return img
 
-# def extract_face(image, resize=(224, 224)):
-#    faces = detector.detect_faces(image)
-#    facesInb64=[]
-#    for face in faces:
-#     x1, y1, width, height = face['box']
-#     x2, y2 = x1 + width, y1 + height
-#     face_boundary = image[y1:y2, x1:x2]
-#     face_image=cv2.resize(face_boundary,resize)
+def extract_face(image, resize=(224, 224)):
+   faces = detector.detect_faces(image)
+   facesInb64=[]
+   for face in faces:
+    x1, y1, width, height = face['box']
+    x2, y2 = x1 + width, y1 + height
+    face_boundary = image[y1:y2, x1:x2]
+    face_image=cv2.resize(face_boundary,resize)
 
-#     res, frame = cv2.imencode('.jpg', face_image)   
-#     b64 = base64.b64encode(frame) 
-#     img = "data:image/jpeg;base64," + b64.decode('utf-8')
-#     facesInb64.append(img)
+    res, frame = cv2.imencode('.jpg', face_image)   
+    b64 = base64.b64encode(frame) 
+    img = "data:image/jpeg;base64," + b64.decode('utf-8')
+    facesInb64.append(img)
 
-#    return facesInb64
+   return facesInb64
 
 
 
@@ -428,94 +428,93 @@ def findfaceWrapper(req, trx_id = 0):
 	resultDf=pd.DataFrame()
 
 	#Just to check
-	# img2=loadBase64Img(img)
-	# face_imgs=extract_face(img2)
-	# for i in face_imgs:
-	# 	print(len(i))
-	#-----------------------
+	img2=loadBase64Img(img)
+	resp_all={}
 
+	face_imgs=extract_face(img2)
+	for face_img in face_imgs:
+		try:
 
-	try:
-
-		resultDf = DeepFace.find(img
-		    , db_path = "dataset_small"
-			, model_name = model_name
-			, distance_metric = distance_metric
-			, detector_backend = detector_backend
-			, silent=True
-		)
-
-	except Exception as err:
-		print("Exception: ",str(err))
-		resp_obj = jsonify({'success': False, 'error': str(err)}), 205
-
-	#-------------------------------------
-
-	resp_obj = {}
-	if not resultDf.empty:
-		print(resultDf)
-		resp_obj['face_found']= 'True'
-		topMatchDf=resultDf.nsmallest(1, 'ArcFace_cosine')
-		imgurl=topMatchDf['identity'][0]
-		print(topMatchDf['ArcFace_cosine'][0])
-		if(topMatchDf['ArcFace_cosine'][0] <0.56):
-			resp_obj['imgurl']= imgurl
-			addTimeStampOfUser(imgurl=imgurl,location=location)
-
-	if resultDf.empty or topMatchDf['ArcFace_cosine'][0] >0.56:
-		resp_obj['face_found']= 'False'
-		resp_obj['imgurl']= 'None'
-		try:	
-			face = DeepFace.detectFace2(img)
-			if(face):
-				resp_obj['HasFace']= face
-				faceImg = DeepFace.detectFace(img_path = img, target_size=(224, 224), enforce_detection = False, detector_backend = 'mtcnn', align = True)
-				count=fcount('dataset_small/')
-				newpath = 'dataset_small/ID'+str(count)  
-				if not os.path.exists(newpath):
-					os.makedirs(newpath)
-
-				save_path='dataset_small/ID'+str(count)+'/image'+str(count)+'.png'
-				matplotlib.image.imsave(save_path, faceImg)
-				resp_obj['faceAdded']= 'true'
-
-				#for updating the embeddings
-				file_name="representations_arcface.pkl"
-				db_path='dataset_small'
-				f = open(db_path+'/'+file_name, 'rb')
-				representations = pickle.load(f)
-				# img_path="dataset_small/ID10/image10.png"
-				rep= DeepFace.represent(save_path,model_name="ArcFace",detector_backend = 'mtcnn')
-				instance=[]
-				instance.append(save_path)
-				instance.append(rep)
-				representations.append(instance)
-				f = open(db_path+'/'+file_name, "wb")
-				pickle.dump(representations, f)
-				f.close()
-				ID=save_path.split("/")
-				print(ID[1])
-				
-				now=datetime.now()
-				#location="lab"
-				timeStamp={"time":now,"location":location}
-
-				with open(save_path, "rb") as img_file:
-					my_string = base64.b64encode(img_file.read())
-
-				rec={"name":ID[1],"imgUrl":my_string.decode("utf-8"),"timeStamps":[timeStamp,],'recent_timeStamp':now,'recent_location':location}
-				collection.insert_one(rec)
-
-			else:
-				resp_obj['HasFace']= face
+			resultDf = DeepFace.find(face_img
+				, db_path = "dataset_small"
+				, model_name = model_name
+				, distance_metric = distance_metric
+				, detector_backend = detector_backend
+				, silent=True
+			)
 
 		except Exception as err:
 			print("Exception: ",str(err))
 			resp_obj = jsonify({'success': False, 'error': str(err)}), 205
-			return resp_obj
 
-	# resp_obj["resultDf"] = resultDf.to_json()
-	return resp_obj
+		#-------------------------------------
+
+		resp_obj = {}
+		if not resultDf.empty:
+			print(resultDf)
+			resp_obj['face_found']= 'True'
+			topMatchDf=resultDf.nsmallest(1, 'ArcFace_cosine')
+			imgurl=topMatchDf['identity'][0]
+			print(topMatchDf['ArcFace_cosine'][0])
+			if(topMatchDf['ArcFace_cosine'][0] <0.56):
+				resp_obj['imgurl']= imgurl
+				addTimeStampOfUser(imgurl=imgurl,location=location)
+
+		if resultDf.empty or topMatchDf['ArcFace_cosine'][0] >0.56:
+			resp_obj['face_found']= 'False'
+			resp_obj['imgurl']= 'None'
+			try:	
+				face = DeepFace.detectFace2(img)
+				if(face):
+					resp_obj['HasFace']= face
+					faceImg = DeepFace.detectFace(img_path = img, target_size=(224, 224), enforce_detection = False, detector_backend = 'mtcnn', align = True)
+					count=fcount('dataset_small/')
+					newpath = 'dataset_small/ID'+str(count)  
+					if not os.path.exists(newpath):
+						os.makedirs(newpath)
+
+					save_path='dataset_small/ID'+str(count)+'/image'+str(count)+'.png'
+					matplotlib.image.imsave(save_path, faceImg)
+					resp_obj['faceAdded']= 'true'
+
+					#for updating the embeddings
+					file_name="representations_arcface.pkl"
+					db_path='dataset_small'
+					f = open(db_path+'/'+file_name, 'rb')
+					representations = pickle.load(f)
+					# img_path="dataset_small/ID10/image10.png"
+					rep= DeepFace.represent(save_path,model_name="ArcFace",detector_backend = 'mtcnn')
+					instance=[]
+					instance.append(save_path)
+					instance.append(rep)
+					representations.append(instance)
+					f = open(db_path+'/'+file_name, "wb")
+					pickle.dump(representations, f)
+					f.close()
+					ID=save_path.split("/")
+					print(ID[1])
+					
+					now=datetime.now()
+					#location="lab"
+					timeStamp={"time":now,"location":location}
+
+					with open(save_path, "rb") as img_file:
+						my_string = base64.b64encode(img_file.read())
+
+					rec={"name":ID[1],"imgUrl":my_string.decode("utf-8"),"timeStamps":[timeStamp,],'recent_timeStamp':now,'recent_location':location}
+					collection.insert_one(rec)
+
+				else:
+					resp_obj['HasFace']= face
+
+			except Exception as err:
+				print("Exception: ",str(err))
+				resp_obj = jsonify({'success': False, 'error': str(err)}), 205
+				return resp_obj
+
+		# resp_obj["resultDf"] = resultDf.to_json()
+		resp_all['resp'+str(len(face_img))]=resp_obj
+	return resp_all
 
 def fcount(path):
     count1 = 0
@@ -539,6 +538,7 @@ def addTimeStampOfUser(imgurl,location):
 	ID=imgurl.split("/")
 	#print(imgurl)
 	#print(ID[1])
+	print(ID[1])
 	one=collection.find_one({"name":ID[1]})
 	timeStamps=one["timeStamps"]
 	now=datetime.now()
@@ -560,7 +560,7 @@ def resetMongoDb():
 	addAllUserInDb('dataset_small')
 
 if __name__ == '__main__':
-	#resetMongoDb()
+	resetMongoDb()
 	parser = argparse.ArgumentParser()
 	parser.add_argument(
 		'-p', '--port',
@@ -570,7 +570,6 @@ if __name__ == '__main__':
 	args = parser.parse_args()
 	#app.run(host='0.0.0.0', port=80,debug=False)
 	app.run(host='0.0.0.0', port=args.port,debug=True)
-
 
 
 
