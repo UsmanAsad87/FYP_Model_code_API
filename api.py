@@ -172,6 +172,11 @@ def findface():
 
 	return resp_obj, 200
 
+@app.route('/test')
+def test():
+	resp_obj = jsonify({'success': True})
+	return resp_obj, 200
+
 def getAllUser():
 	allDocs=collection.find({}).sort('recent_timeStamp',-1)
 	Docs=[]
@@ -218,16 +223,18 @@ def searchByImg(img):
 		IDs=[]
 		for index, row in resultDf.iterrows():
 			imgurl=row['identity']
+			imgurl= imgurl.replace("\\", "/")
 			id=imgurl.split("/")[1]
 			if row["ArcFace_cosine"] < 0.56 and not id in IDs:
 				imgurl=row['identity']
 				#print(imgurl.split("/")[1] in IDs)
-				ID=imgurl.split("/")
 				user=collection.find_one({"name":id})
 				IDs.append(id)
+				print(id)
 				#print(user==None)
 				#if no user is found then this will run
 				if(user==None):
+					print("none")
 					return render_template('index.html',allTodo=Docs)
 
 				
@@ -242,8 +249,10 @@ def searchByImg(img):
 
 
 
-
+       
+		print(Docs)
 		return render_template('index.html',allTodo=Docs)
+
 
 			# imgurl=topMatchDf['identity'][0]
 			# imgurl= imgurl.replace("\\", "/")
@@ -293,28 +302,28 @@ def searchByImg(img):
 		# 	print(st.time)
 		# return render_template('index.html',allTodo=Docs)
 
-# def searchByName(name):
-# 	#if search query is empty
-# 	if(name==''):
-# 		return getAllUser()
+def searchByName(name):
+	#if search query is empty
+	if(name==''):
+		return getAllUser()
 	
-# 	#if no user is found then this will run
-# 	user=collection.find_one({"name":name})
-# 	if(user==None):
-# 		return render_template('index.html',allTodo=[])
+	#if no user is found then this will run
+	user=collection.find_one({"name":name})
+	if(user==None):
+		return render_template('index.html',allTodo=[])
 
-# 	#if user record is found	
-# 	Docs=[]	
-# 	stamps=[]
-# 	for item in user['timeStamps']:
-# 		stamp=TimeStamp(item)
-# 		stamps.append(stamp)
-# 		print("DATA: "+stamp.location+" "+stamp.time+"  ")
-# 	userData= User(user,stamps)
-# 	Docs.append(userData)
-# 	for st in userData.timeStamps:
-# 		print(st.time)
-# 	return render_template('index.html',allTodo=Docs)
+	#if user record is found	
+	Docs=[]	
+	stamps=[]
+	for item in user['timeStamps']:
+		stamp=TimeStamp(item)
+		stamps.append(stamp)
+		print("DATA: "+stamp.location+" "+stamp.time+"  ")
+	userData= User(user,stamps)
+	Docs.append(userData)
+	for st in userData.timeStamps:
+		print(st.time)
+	return render_template('index.html',allTodo=Docs)
 
 
 
@@ -560,7 +569,7 @@ def resetMongoDb():
 	addAllUserInDb('dataset_small')
 
 if __name__ == '__main__':
-	# resetMongoDb()
+	resetMongoDb()
 	parser = argparse.ArgumentParser()
 	parser.add_argument(
 		'-p', '--port',
@@ -569,7 +578,8 @@ if __name__ == '__main__':
 		help='Port of serving api')
 	args = parser.parse_args()
 	#app.run(host='0.0.0.0', port=80,debug=False)
-	app.run(host='0.0.0.0', port=args.port,debug=True)
+	#app.run(host='0.0.0.0', port=args.port,debug=True)
+	app.run( port=args.port,debug=True)
 
 
 
