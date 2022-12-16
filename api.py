@@ -293,28 +293,28 @@ def searchByImg(img):
 		# 	print(st.time)
 		# return render_template('index.html',allTodo=Docs)
 
-# def searchByName(name):
-# 	#if search query is empty
-# 	if(name==''):
-# 		return getAllUser()
+def searchByName(name):
+	#if search query is empty
+	if(name==''):
+		return getAllUser()
 	
-# 	#if no user is found then this will run
-# 	user=collection.find_one({"name":name})
-# 	if(user==None):
-# 		return render_template('index.html',allTodo=[])
+	#if no user is found then this will run
+	user=collection.find_one({"name":name})
+	if(user==None):
+		return render_template('index.html',allTodo=[])
 
-# 	#if user record is found	
-# 	Docs=[]	
-# 	stamps=[]
-# 	for item in user['timeStamps']:
-# 		stamp=TimeStamp(item)
-# 		stamps.append(stamp)
-# 		print("DATA: "+stamp.location+" "+stamp.time+"  ")
-# 	userData= User(user,stamps)
-# 	Docs.append(userData)
-# 	for st in userData.timeStamps:
-# 		print(st.time)
-# 	return render_template('index.html',allTodo=Docs)
+	#if user record is found	
+	Docs=[]	
+	stamps=[]
+	for item in user['timeStamps']:
+		stamp=TimeStamp(item)
+		stamps.append(stamp)
+		print("DATA: "+stamp.location+" "+stamp.time+"  ")
+	userData= User(user,stamps)
+	Docs.append(userData)
+	for st in userData.timeStamps:
+		print(st.time)
+	return render_template('index.html',allTodo=Docs)
 
 
 
