@@ -473,10 +473,10 @@ def findfaceWrapper(req, trx_id = 0):
 			resp_obj['face_found']= 'False'
 			resp_obj['imgurl']= 'None'
 			try:	
-				face = DeepFace.detectFace2(img)
+				face = DeepFace.detectFace2(face_img)
 				if(face):
 					resp_obj['HasFace']= face
-					faceImg = DeepFace.detectFace(img_path = img, target_size=(224, 224), enforce_detection = False, detector_backend = 'mtcnn', align = True)
+					faceImg = DeepFace.detectFace(img_path = face_img, target_size=(224, 224), enforce_detection = False, detector_backend = 'mtcnn', align = True)
 					count=fcount('dataset_small/')
 					newpath = 'dataset_small/ID'+str(count)  
 					if not os.path.exists(newpath):
