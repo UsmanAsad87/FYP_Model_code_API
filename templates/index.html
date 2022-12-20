@@ -7,9 +7,9 @@ Face
 <style>
  .firstheading
    {
-    height: 700px;
+    height: 950px;
     width: 100%;
-    background-image: url('../static/FaceRT1.JPG');
+    background-image: url(/static/FaceRT1.jpg);
     background-repeat: no-repeat;
     background-size: 100% 100%;
     background-position: absolute;
@@ -17,15 +17,16 @@ Face
    .heading 
    {
    color:white;
-   font-size: 50px;
+   font-size: 60px;
    font-family: "Century Gothic sans-serif";
-   padding-left: 230px;
+   padding-left: 380px;
+   margin-top: 100px;
    }
    .footer {
    left: 0;
    bottom: 0;
    width: 100%;
-   background-image: url('../static/FaceRT2.JPG');
+   background-image: url(/static/FaceRT2.jpg);
    color: white;
    text-align: center;
    padding-top:15px;
@@ -45,7 +46,7 @@ Face
 
 <section>
 <div class="firstheading">
-  <a class="navbar-brand" href="/"><img src="../static/FaceRT.PNG" width="150" height="150" ></a>
+  <a class="navbar-brand" href="/"><img src="/static/FaceRT.png" width="150" height="150" ></a>
   <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
@@ -57,8 +58,8 @@ Face
 
 
 <div style="font-family: Century Gothic, sans-serif;
-font-size: 25px; 
-padding-left:70px;
+font-size: 35px; 
+padding-left:200px;
 color:white ">
   <i>A Smart app that tracks your location</i>
 </div>
@@ -73,17 +74,19 @@ color:white ">
 
 </br> </br> </br>
  
-<div class="container my-3" style=" color:rgb(2,39,68); 
+<div style=" color:rgb(2,39,68); 
 font-family:Century Gothic, sans-serif;">
   <h1 style="font-weight:bold; font-size: 50px;
-  padding-left: 320px;">
+  padding-left: 600px;">
     Data log of Enteries
   </h1></div>
 <div>
-  <hr style="border:2px solid rgb(113,47,34) ;width: 200px; margin-left: 550px; margin-top: 30px;"></hr></div>
+  <hr style="border:2px solid rgb(113,47,34) ;width: 250px; margin-left: 700px; margin-top: 30px;"></hr></div>
 
 </br>
-<div class="container my-3" style="width: 40%;float: left; margin-left:100px;">
+
+<div style="float:left; width:35%;margin-left: 450px;margin-bottom: 60px; margin-top: 10px;">
+<div>
     <form class="row g-3" action="/" method="POST">
       <div class="col-auto">
         <input type="text" class="form-control" id="name" name="name" value=""  placeholder="Search name" style="width:320px;">
@@ -94,8 +97,8 @@ font-family:Century Gothic, sans-serif;">
       </div>
     </form>
 </div>
-
-<div class="container my-3" style="margin-left: 700px;">
+</br>
+<div >
   <form class="row g-3" action = "/" method = "POST" enctype = "multipart/form-data">
     <!-- <h3>Add a picture of person to locate</h3>
     <input type = "file" name = "newcomer" accept="image/ /><br>
@@ -108,8 +111,9 @@ font-family:Century Gothic, sans-serif;">
   </div>
   </form>
 </div>
+</div>
 
-<div class="container my-3" style="margin-left:600px;" >
+<div style="margin-top:40px ;">
   <form action="/">
   <button type="submit" class="btn btn-dark">Refresh</button>
   </form>
@@ -124,8 +128,9 @@ font-family:Century Gothic, sans-serif;">
   </div>
   {% else %}
   <table class="table" style="border:1px white solid; border-radius:40px;border-bottom: 1px solid #ddd;background-color:rgb(242, 252, 255);">
-    <thead style="color:rgb(6, 47, 78);">
+    <thead style="color:rgb(6, 47, 78); margin:100px;">
       <tr>
+        
         <th scope="col">SNo</th>
         <th scope="col">IMG</th>
         <th scope="col">Name</th>
