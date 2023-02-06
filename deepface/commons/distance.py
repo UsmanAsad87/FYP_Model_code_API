@@ -30,6 +30,9 @@ def findThreshold(model_name, distance_metric):
         'Facenet':  {'cosine': 0.40, 'euclidean': 10, 'euclidean_l2': 0.80},
         'Facenet512':  {'cosine': 0.30, 'euclidean': 23.56, 'euclidean_l2': 1.04},
         'ArcFace':  {'cosine': 0.68, 'euclidean': 4.15, 'euclidean_l2': 1.13},
+        # #TODO: find the best threshold values
+        # 'ArcFace':  {'cosine': 0.00004, 'euclidean': 4.15, 'euclidean_l2': 1.13},
+
         'Dlib': 	{'cosine': 0.07, 'euclidean': 0.6, 'euclidean_l2': 0.4},
 
         #TODO: find the best threshold values

@@ -476,6 +476,7 @@ def findfaceWrapper(req, trx_id = 0):
 				face = DeepFace.detectFace2(face_img)
 				if(face):
 					resp_obj['HasFace']= face
+					resp_obj['face_found']= 'true'
 					faceImg = DeepFace.detectFace(img_path = face_img, target_size=(224, 224), enforce_detection = False, detector_backend = 'mtcnn', align = True)
 					count=fcount('dataset_small/')
 					newpath = 'dataset_small/ID'+str(count)  
@@ -483,6 +484,7 @@ def findfaceWrapper(req, trx_id = 0):
 						os.makedirs(newpath)
 
 					save_path='dataset_small/ID'+str(count)+'/image'+str(count)+'.png'
+					resp_obj['imgurl']= save_path
 					matplotlib.image.imsave(save_path, faceImg)
 					resp_obj['faceAdded']= 'true'
 
@@ -523,6 +525,11 @@ def findfaceWrapper(req, trx_id = 0):
 
 		# resp_obj["resultDf"] = resultDf.to_json()
 		resp_all['resp'+str(len(face_img))]=resp_obj
+
+	if(len(face_imgs)==0):
+		resp_all['face_found']= 'False'
+		print("usman")
+	
 	return resp_all
 
 def fcount(path):
@@ -569,7 +576,7 @@ def resetMongoDb():
 	addAllUserInDb('dataset_small')
 
 if __name__ == '__main__':
-	#resetMongoDb()
+	resetMongoDb()
 	parser = argparse.ArgumentParser()
 	parser.add_argument(
 		'-p', '--port',

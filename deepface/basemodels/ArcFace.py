@@ -12,7 +12,16 @@ import gdown
 
 from deepface.commons import functions
 
+
+
+from tensorflow.keras.models import *
+from tensorflow.keras.layers import *
+
 #url = "https://drive.google.com/uc?id=1LVB3CdVejpmGHM28BpqqkbZP5hDEcdZY"
+
+
+
+
 
 def loadModel(url = 'https://github.com/serengil/deepface_models/releases/download/v1.0/arcface_weights.h5'):
 	base_model = ResNet34()
@@ -24,7 +33,13 @@ def loadModel(url = 'https://github.com/serengil/deepface_models/releases/downlo
 	arcface_model = keras.layers.Dense(512, activation=None, use_bias=True, kernel_initializer="glorot_normal")(arcface_model)
 	embedding = keras.layers.BatchNormalization(momentum=0.9, epsilon=2e-5, name="embedding", scale=True)(arcface_model)
 	model = keras.models.Model(inputs, embedding, name=base_model.name)
-
+	new_model= Sequential()
+	new_model.add(model)
+	new_model.add(Flatten())
+	new_model.add(Dropout(0.2))
+	new_model.add(Dense(256,activation='relu'))
+	new_model.add(Dropout(0.2))
+	new_model.add(Dense(151,activation='softmax'))
 	#---------------------------------------
 	#check the availability of pre-trained weights
 
@@ -32,17 +47,65 @@ def loadModel(url = 'https://github.com/serengil/deepface_models/releases/downlo
 
 	file_name = "arcface_weights.h5"
 	output = home+'/.deepface/weights/'+file_name
+	# output = 'deepface/Saved_model/my_model_weights.h5' 
+	# if os.path.isfile(output) != True:
 
-	if os.path.isfile(output) != True:
-
-		print(file_name," will be downloaded to ",output)
-		gdown.download(url, output, quiet=False)
+	# 	print(file_name," will be downloaded to ",output)
+	# 	gdown.download(url, output, quiet=False)
 
 	#---------------------------------------
 	
-	model.load_weights(output)
+	new_model.load_weights('saved_model8/my_model_weights.h5')
+	# print(model.summary())
+	model = Model(new_model.input, new_model.layers[1].output)
 
 	return model
+
+# def loadModel(url = 'https://github.com/serengil/deepface_models/releases/download/v1.0/arcface_weights.h5'):
+# 	base_model = ResNet34()
+# 	inputs = base_model.inputs[0]
+# 	arcface_model = base_model.outputs[0]
+# 	arcface_model = keras.layers.BatchNormalization(momentum=0.9, epsilon=2e-5)(arcface_model)
+# 	arcface_model = keras.layers.Dropout(0.4)(arcface_model)
+# 	arcface_model = keras.layers.Flatten()(arcface_model)
+# 	arcface_model = keras.layers.Dense(512, activation=None, use_bias=True, kernel_initializer="glorot_normal")(arcface_model)
+# 	embedding = keras.layers.BatchNormalization(momentum=0.9, epsilon=2e-5, name="embedding", scale=True)(arcface_model)
+# 	model = keras.models.Model(inputs, embedding, name=base_model.name)
+
+# 	#---------------------------------------
+# 	#check the availability of pre-trained weights
+
+
+# #     # Extraaaas
+# #     new_model=Sequential()
+# # 	new_model.add(Input(shape=(112,112,3)))
+# #     new_model.add(model)
+# #     new_model.add(Flatten())
+# #     new_model.add(Dropout(0.5))
+# #     new_model.add(Dense(256,activation='relu'))
+# #     new_model.add(Dropout(0.2))
+# #     new_model.add(Dense(151,activation='softmax'))
+# # 	new_model.load_weights('saved_model6/my_model_weights.h5')
+
+# # 	return new_model
+# 	# Extraaaa
+
+
+# 	home = functions.get_deepface_home()
+
+# 	file_name = "arcface_weights.h5"
+# 	output = home+'/.deepface/weights/'+file_name
+
+# 	if os.path.isfile(output) != True:
+
+# 		print(file_name," will be downloaded to ",output)
+# 		gdown.download(url, output, quiet=False)
+
+# 	#---------------------------------------
+	
+# 	model.load_weights(output)
+
+# 	return model
 
 def ResNet34():
 
