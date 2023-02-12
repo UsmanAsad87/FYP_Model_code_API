@@ -221,7 +221,13 @@ def preprocess_face(img, target_size=(224, 224), grayscale = False, enforce_dete
 	img = load_image(img)
 	base_img = img.copy()
 
+	tic= time.time()
+	
+
 	img, region = detect_face(img = img, detector_backend = detector_backend, grayscale = grayscale, enforce_detection = enforce_detection, align = align)
+	toc= time.time()
+
+	print("Detect face Preprocess the Img:"+str(toc-tic))
 
 	# #--------------------------
 
