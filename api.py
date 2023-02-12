@@ -166,6 +166,7 @@ def findface():
 	#--------------------------
 
 	toc =  time.time()
+	print("TOTAL TIME:"+str(toc-tic))
 
 	resp_obj["trx_id"] = trx_id
 	resp_obj["seconds"] = toc-tic
@@ -437,12 +438,19 @@ def findfaceWrapper(req, trx_id = 0):
 	resultDf=pd.DataFrame()
 
 	#Just to check
+	tic1 =  time.time()
 	img2=loadBase64Img(img)
+	toc1 =  time.time()
+	print("loadBase64Img TIME:"+str(toc1-tic1))
 	resp_all={}
-
+	
+	tic2 = time.time()
 	face_imgs=extract_face(img2)
+	toc2 = time.time()
+	print("extract_faces TIME:"+str(toc2-tic2))
 	for face_img in face_imgs:
 		try:
+			tic3 =  time.time()
 
 			resultDf = DeepFace.find(face_img
 				, db_path = "dataset_small"
@@ -452,12 +460,16 @@ def findfaceWrapper(req, trx_id = 0):
 				, silent=True
 			)
 
+			toc3 =  time.time()
+			print("FIND_FACE TIME:"+str(toc3-tic3))
+
 		except Exception as err:
 			print("Exception: ",str(err))
 			resp_obj = jsonify({'success': False, 'error': str(err)}), 205
 
 		#-------------------------------------
 
+		tic4 =  time.time()
 		resp_obj = {}
 		if not resultDf.empty:
 			print(resultDf)
@@ -468,12 +480,17 @@ def findfaceWrapper(req, trx_id = 0):
 			if(topMatchDf['ArcFace_cosine'][0] <0.56):
 				resp_obj['imgurl']= imgurl
 				addTimeStampOfUser(imgurl=imgurl,location=location)
+		
+
+		toc4 =  time.time()
+		print("POST Processing TIME:"+str(toc4-tic4))
 
 		if resultDf.empty or topMatchDf['ArcFace_cosine'][0] >0.56:
 			resp_obj['face_found']= 'False'
 			resp_obj['imgurl']= 'None'
 			try:	
-				face = DeepFace.detectFace2(face_img)
+				# face = DeepFace.detectFace2(face_img)
+				face=True
 				if(face):
 					resp_obj['HasFace']= face
 					resp_obj['face_found']= 'true'
@@ -528,7 +545,7 @@ def findfaceWrapper(req, trx_id = 0):
 
 	if(len(face_imgs)==0):
 		resp_all['face_found']= 'False'
-		print("usman")
+		# print("usman")
 	
 	return resp_all
 
@@ -576,7 +593,7 @@ def resetMongoDb():
 	addAllUserInDb('dataset_small')
 
 if __name__ == '__main__':
-	resetMongoDb()
+	#resetMongoDb()
 	parser = argparse.ArgumentParser()
 	parser.add_argument(
 		'-p', '--port',

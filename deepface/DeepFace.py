@@ -580,12 +580,19 @@ def find(img_path, db_path, model_name ='VGG-Face', distance_metric = 'cosine', 
 				for j in model_names:
 					custom_model = models[j]
 
+
+
+					ticRep=time.time()
+
+
 					representation = represent(img_path = employee
 						, model_name = model_name, model = custom_model
 						, enforce_detection = enforce_detection, detector_backend = detector_backend
 						, align = align
 						, normalization = normalization
 						)
+					tocRep=time.time()
+					print("Time Taken in representaion:"+ str(tocRep-ticRep))
 
 					instance.append(representation)
 
@@ -623,6 +630,12 @@ def find(img_path, db_path, model_name ='VGG-Face', distance_metric = 'cosine', 
 
 			for j in model_names:
 				custom_model = models[j]
+				
+				
+				
+				ticRep=time.time()
+
+
 
 				target_representation = represent(img_path = img_path
 					, model_name = model_name, model = custom_model
@@ -630,6 +643,8 @@ def find(img_path, db_path, model_name ='VGG-Face', distance_metric = 'cosine', 
 					, align = align
 					, normalization = normalization
 					)
+				tocRep=time.time()
+				print("Time Taken in representaion:"+ str(tocRep-ticRep))
 
 				for k in metric_names:
 					distances = []
@@ -753,11 +768,13 @@ def represent(img_path, model_name = 'VGG-Face', model = None, enforce_detection
 	input_shape_x, input_shape_y = functions.find_input_shape(model)
 
 	#detect and align
+	print(img_path)
 	img = functions.preprocess_face(img = img_path
 		, target_size=(input_shape_y, input_shape_x)
 		, enforce_detection = enforce_detection
 		, detector_backend = detector_backend
 		, align = align)
+	print(img)
 
 	#---------------------------------
 	#custom normalization
@@ -767,7 +784,11 @@ def represent(img_path, model_name = 'VGG-Face', model = None, enforce_detection
 	#---------------------------------
 
 	#represent
+	tic=time.time()
 	embedding = model.predict(img)[0].tolist()
+	toc=time.time()
+
+	print("Time taken in Model Predicts:"+str(toc-tic))
 
 	return embedding
 
