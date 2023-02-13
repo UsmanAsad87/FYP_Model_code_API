@@ -7,6 +7,7 @@ from pathlib import Path
 from PIL import Image
 import requests
 import base64 
+import time
 
 from deepface.detectors import FaceDetector
 
