@@ -55,7 +55,7 @@ from tensorflow.keras.layers import *
 
 # 	#---------------------------------------
 	
-# 	new_model.load_weights('saved_model8/my_model_weights.h5')
+# 	new_model.load_weights('D:/FYP_code/FYP_MODEL_CODE_API/saved_model8/my_model_weights.h5')
 # 	# print(model.summary())
 # 	model = Model(new_model.input, new_model.layers[1].output)
 

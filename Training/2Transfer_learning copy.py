@@ -102,6 +102,8 @@ def transfer_learning():
 
     # # new_model.load_weights('saved_model_5/my_model_weights.h5')
     # # print('usman loaded')
+
+    
     
 
     new_model.compile(

@@ -438,6 +438,7 @@ def findfaceWrapper(req, trx_id = 0):
 	resultDf=pd.DataFrame()
 
 	#Just to check
+
 	tic1 =  time.time()
 	img2=loadBase64Img(img)
 	toc1 =  time.time()
@@ -593,7 +594,7 @@ def resetMongoDb():
 	addAllUserInDb('dataset_small')
 
 if __name__ == '__main__':
-	#resetMongoDb()
+	resetMongoDb()
 	parser = argparse.ArgumentParser()
 	parser.add_argument(
 		'-p', '--port',
@@ -602,8 +603,8 @@ if __name__ == '__main__':
 		help='Port of serving api')
 	args = parser.parse_args()
 	#app.run(host='0.0.0.0', port=80,debug=False)
-	app.run(host='0.0.0.0', port=args.port,debug=True)
-	#app.run( port=args.port,debug=True)
+	# app.run(host='0.0.0.0', port=args.port,debug=True)
+	app.run( port=args.port,debug=True)
 
 
 

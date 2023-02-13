@@ -768,13 +768,13 @@ def represent(img_path, model_name = 'VGG-Face', model = None, enforce_detection
 	input_shape_x, input_shape_y = functions.find_input_shape(model)
 
 	#detect and align
-	print(img_path)
+	# print(img_path)
 	img = functions.preprocess_face(img = img_path
 		, target_size=(input_shape_y, input_shape_x)
 		, enforce_detection = enforce_detection
 		, detector_backend = detector_backend
 		, align = align)
-	print(img)
+	# print(img)
 
 	#---------------------------------
 	#custom normalization
