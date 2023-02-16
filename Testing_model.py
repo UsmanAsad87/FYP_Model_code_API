@@ -11,16 +11,20 @@ import argparse
 
 
 import os
-rootdir = 'D:/FYP_code/FYP_MODEL_CODE_API/EXTRA/data_FYP_clean/'
+# rootdir = 'D:/FYP_code/FYP_MODEL_CODE_API/EXTRA/data_FYP_clean2/'
+rootdir ='/home/all/FYP_Model_code_API/EXTRA/data_FYP_clean2/'
 
 for subdir, dirs, files in os.walk(rootdir):
     for file in files:
-        
+        print(subdir)
+        print(file)
         # print(img)
         try:
-            imgPath=os.path.join(subdir, file)
+            # imgPath=os.path.join(subdir, file)
+            imgPath='EXTRA/data_FYP_clean2/Aamir_Khan/'+file
+            imgPath=subdir+'/'+file
             print(imgPath)
-            # if(imgPath=='D:/FYP_code/FYP_MODEL_CODE_API/EXTRA/data_FYP_clean\Aishwarya_Rai\6.jpg'):
+            # # if(imgPath=='D:/FYP_code/FYP_MODEL_CODE_API/EXTRA/data_FYP_clean\Aishwarya_Rai\6.jpg'):
             # my_img = cv2.imread(imgPath, cv2.IMREAD_UNCHANGED)
             # b64 = base64.b64encode(my_img) 
             # img = "data:image/jpeg;base64," + b64.decode('utf-8')
@@ -29,9 +33,10 @@ for subdir, dirs, files in os.walk(rootdir):
             with open(imgPath, "rb") as img_file:
                 my_string = base64.b64encode(img_file.read())
                 img = "data:image/jpeg;base64," + my_string.decode('utf-8') # b64.decode('utf-8')
+                # print(img)
 
-            # api_url = "http://172.30.34.64:5000/findface"
-            api_url = "http://127.0.0.1:5000/findface"
+            api_url = "http://172.30.34.64:5000/findface"
+            # api_url = "http://127.0.0.1:5000/findface"
             # print(api_url)
             
             data= {
@@ -39,6 +44,7 @@ for subdir, dirs, files in os.walk(rootdir):
                     "location":"lab ICV",
                     "img":img
             }
+            print(data)
             response = requests.post(api_url, json=data,)
             print(response.json())
 
