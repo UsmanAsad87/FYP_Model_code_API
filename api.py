@@ -95,7 +95,8 @@ app = Flask(__name__)
 
 myclient = pymongo.MongoClient("mongodb://localhost:27017/")
 
-mydb = myclient["FaceRecog"]
+# mydb = myclient["FaceRecog"]
+mydb = myclient["FaceRecog2"]
 
 collection=mydb["Users"]
 
@@ -594,7 +595,7 @@ def resetMongoDb():
 	addAllUserInDb('dataset_small')
 
 if __name__ == '__main__':
-	resetMongoDb()
+	# resetMongoDb()
 	parser = argparse.ArgumentParser()
 	parser.add_argument(
 		'-p', '--port',
@@ -602,9 +603,9 @@ if __name__ == '__main__':
 		default=5000,
 		help='Port of serving api')
 	args = parser.parse_args()
-	#app.run(host='0.0.0.0', port=80,debug=False)
+	app.run(host='192.168.0.104', port=5000,debug=False)
 	# app.run(host='0.0.0.0', port=args.port,debug=True)
-	app.run( port=args.port,debug=True)
+	# app.run( port=args.port,debug=True)
 
 
 
