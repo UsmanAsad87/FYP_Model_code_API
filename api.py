@@ -95,7 +95,8 @@ app = Flask(__name__)
 
 myclient = pymongo.MongoClient("mongodb://localhost:27017/")
 
-mydb = myclient["FaceRecog"]
+# mydb = myclient["FaceRecog"]
+mydb = myclient["FaceRecog2"]
 
 collection=mydb["Users"]
 
@@ -603,8 +604,8 @@ if __name__ == '__main__':
 		help='Port of serving api')
 	args = parser.parse_args()
 	#app.run(host='0.0.0.0', port=80,debug=False)
-	# app.run(host='0.0.0.0', port=args.port,debug=True)
-	app.run( port=args.port,debug=True)
+	app.run(host='0.0.0.0', port=args.port,debug=True)
+	# app.run( port=args.port,debug=True)
 
 
 
