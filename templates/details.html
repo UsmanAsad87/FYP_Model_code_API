@@ -44,19 +44,25 @@ font-family:Century Gothic, sans-serif;">
     <!-- <div class="row "> -->
       <div style="width: 50%;float: left; margin-left:200px;">
       </br>
+      <br/>
+        <br/>
         <h5>Name: {{user.id}}</h5>
         <h5>Recent Location: {{user.recentLocation}}</h5>
         <h5>Recent Time: {{user.recentTime}}</h5>
       </div>
       <div>
-        <div></div>
+        <br/>
+        <br/>
         {% set testing = user.imgUrl %}
-      <img src="{{ testing }}" id="img" alt="Red dot"  width="150" height="150" />
+      <img src="{{ testing }}"  style="border: 5px solid #0a449b;" id="img2" alt="Red dot"  width="200" height="200" />
     </div>
       </div>
     <!-- </div> -->
     </div>
     <div style="background-color:rgb(242, 252, 255); margin-top:-17px;margin-left:280px; padding-left:20px; padding-bottom:20px; margin-right:280px;">
+      <br/>
+      <br/>
+      <br/>
       {% if user.timeStamps|length==0 %}
       <div>
         <b>No timeStamps found.</b>
@@ -68,6 +74,7 @@ font-family:Century Gothic, sans-serif;">
           <th scope="col">SNo</th>
           <th scope="col">Location</th>
           <th scope="col">Time</th>
+          <th scope="col">IMG</th>
         </tr>
       </thead>
       <tbody>
@@ -76,6 +83,8 @@ font-family:Century Gothic, sans-serif;">
       <th scope="row">{{loop.index}}</th>
       <td>{{stamp.location}}</td>
       <td>{{stamp.time}}</td>
+      {% set img = stamp.img %}
+     <td><img src="{{ img}}" id="img" alt="Red dot" width="100" height="100" /></td>
       </tr>
       {% endfor %}
     </tbody>
