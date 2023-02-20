@@ -78,13 +78,15 @@ class User:
 		self.recentTime = '' if item['recent_timeStamp']==datetime.min else item['recent_timeStamp'].strftime("%m/%d/%Y, %H:%M:%S")
 
 class TimeStamp:
-	def __init__(self,time,location):
+	def __init__(self,time,location,img):
 		self.time = time
 		self.location= location
+		self.img = img
 
 	def __init__(self, stamp):
 		self.time = stamp['time'].strftime("%m/%d/%Y, %H:%M:%S")
 		self.location= stamp['location']
+		self.img = stamp["img"]
 
 
 
@@ -141,10 +143,10 @@ def details(id):
 	for item in user['timeStamps']:
 		stamp=TimeStamp(item)
 		stamps.append(stamp)
-		print("DATA: "+stamp.location+" "+stamp.time+"  ")
+		# print("DATA: "+stamp.location+" "+stamp.time+" "+stamp.img+"  ")
 	userData= User(user,stamps)
-	for st in userData.timeStamps:
-		print(st.time)
+	# for st in userData.timeStamps:
+	# 	print(st.time)
 	return render_template('details.html',user=userData)
 
 @app.route('/findface', methods=['POST'])
@@ -481,7 +483,7 @@ def findfaceWrapper(req, trx_id = 0):
 			print(topMatchDf['ArcFace_cosine'][0])
 			if(topMatchDf['ArcFace_cosine'][0] <0.56):
 				resp_obj['imgurl']= imgurl
-				addTimeStampOfUser(imgurl=imgurl,location=location)
+				addTimeStampOfUser(imgurl=imgurl,location=location,img=face_img)
 		
 
 		toc4 =  time.time()
@@ -526,7 +528,7 @@ def findfaceWrapper(req, trx_id = 0):
 					
 					now=datetime.now()
 					#location="lab"
-					timeStamp={"time":now,"location":location}
+					timeStamp={"time":now,"location":location,"img":face_img}
 
 					with open(save_path, "rb") as img_file:
 						my_string = base64.b64encode(img_file.read())
@@ -568,21 +570,22 @@ def addAllUserInDb(path):
 			rec={"name":item,"imgUrl":my_string.decode("utf-8"),"recent_timeStamp":datetime.min,'recent_location':'none',"timeStamps":[]}
 			collection.insert_one(rec)
 
-def addTimeStampOfUser(imgurl,location):
+def addTimeStampOfUser(imgurl,location,img):
 	imgurl= imgurl.replace("\\", "/")
 	ID=imgurl.split("/")
 	#print(imgurl)
 	#print(ID[1])
 	print(ID[1])
 	one=collection.find_one({"name":ID[1]})
+	# print(one)
 	timeStamps=one["timeStamps"]
 	now=datetime.now()
 	#location="lab"
 	# print(now)
 	
-	timeStamp={"time":now,"location":location}
+	timeStamp={"time":now,"location":location,'img':img}
 	timeStamps.append(timeStamp)
-	print(timeStamp)
+	# print(timeStamp)
 	prev={"name":ID[1]}
 	nextt={"$set":{"timeStamps":timeStamps,"recent_timeStamp":now,'recent_location':location}}
 	up=collection.update_many(prev,nextt)
@@ -595,7 +598,7 @@ def resetMongoDb():
 	addAllUserInDb('dataset_small')
 
 if __name__ == '__main__':
-	resetMongoDb()
+	# resetMongoDb()
 	parser = argparse.ArgumentParser()
 	parser.add_argument(
 		'-p', '--port',
