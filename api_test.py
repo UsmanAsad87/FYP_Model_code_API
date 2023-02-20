@@ -90,7 +90,8 @@ class TimeStamp:
 
 
 
-
+model_name='ArcFace'
+matric_cosine="ArcFace_cosine"
 app = Flask(__name__)
 # app.config['MONGO_URI']="mongodb://localhost:27017/FaceRecog"
 # mongo=PyMongo(app)
@@ -144,6 +145,7 @@ def details(id):
 		stamp=TimeStamp(item)
 		stamps.append(stamp)
 		# print("DATA: "+stamp.location+" "+stamp.time+" "+stamp.img+"  ")
+	# stamps.sort(key=lambda x: x.time,reverse=True)
 	stamps=sorted(stamps,key= lambda x: x.time,reverse=True)
 	userData= User(user,stamps)
 	# for st in userData.timeStamps:
@@ -211,7 +213,7 @@ def searchByImg(img):
 	try:
 		resultDf = DeepFace.find(instance
 		, db_path = 'dataset_small'
-		, model_name = 'ArcFace'
+		, model_name = model_name
 		, distance_metric = 'cosine'
 		, detector_backend = 'mtcnn'
 		, silent=True
@@ -230,7 +232,7 @@ def searchByImg(img):
 			imgurl=row['identity']
 			imgurl= imgurl.replace("\\", "/")
 			id=imgurl.split("/")[1]
-			if row["ArcFace_cosine"] < 0.56 and not id in IDs:
+			if not id in IDs:
 				imgurl=row['identity']
 				#print(imgurl.split("/")[1] in IDs)
 				user=collection.find_one({"name":id})
@@ -284,7 +286,7 @@ def searchByImg(img):
 		#WORKING
 		# print(resultDf)
 		# print(resultDf['identity'][0])
-		# topMatchDf=resultDf.nsmallest(1, 'ArcFace_cosine')
+		# topMatchDf=resultDf.nsmallest(1, matric_cosine)
 		# imgurl=topMatchDf['identity'][0]
 		# imgurl= imgurl.replace("\\", "/")
 		# ID=imgurl.split("/")
@@ -479,18 +481,17 @@ def findfaceWrapper(req, trx_id = 0):
 		if not resultDf.empty:
 			print(resultDf)
 			resp_obj['face_found']= 'True'
-			topMatchDf=resultDf.nsmallest(1, 'ArcFace_cosine')
+			topMatchDf=resultDf.nsmallest(1, matric_cosine)
 			imgurl=topMatchDf['identity'][0]
-			print(topMatchDf['ArcFace_cosine'][0])
-			if(topMatchDf['ArcFace_cosine'][0] <0.56):
-				resp_obj['imgurl']= imgurl
-				addTimeStampOfUser(imgurl=imgurl,location=location,img=face_img)
+			print("TOP_MAtch: " + str(topMatchDf[matric_cosine][0]))
+			resp_obj['imgurl']= imgurl
+			addTimeStampOfUser(imgurl=imgurl,location=location,img=face_img)
 		
 
 		toc4 =  time.time()
 		print("POST Processing TIME:"+str(toc4-tic4))
 
-		if resultDf.empty or topMatchDf['ArcFace_cosine'][0] >0.56:
+		if resultDf.empty :
 			resp_obj['face_found']= 'False'
 			resp_obj['imgurl']= 'None'
 			try:	
