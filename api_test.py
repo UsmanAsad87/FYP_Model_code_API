@@ -90,8 +90,8 @@ class TimeStamp:
 
 
 
-model_name='ArcFace'
-matric_cosine="ArcFace_cosine"
+model_name="Facenet512"#'ArcFace'
+matric_cosine= "Facenet512_cosine" #"ArcFace_cosine"
 app = Flask(__name__)
 # app.config['MONGO_URI']="mongodb://localhost:27017/FaceRecog"
 # mongo=PyMongo(app)
@@ -211,13 +211,7 @@ def searchByImg(img):
 	instance=instance[:-1]
 	resultDf=pd.DataFrame()
 	try:
-		resultDf = DeepFace.find(instance
-		, db_path = 'dataset_small'
-		, model_name = model_name
-		, distance_metric = 'cosine'
-		, detector_backend = 'mtcnn'
-		, silent=True
-	)
+		resultDf = DeepFace.find(instance, db_path = 'dataset_small', model_name = model_name, distance_metric = 'cosine', detector_backend = 'mtcnn', silent=True)
 	except Exception as err:
 		resp_obj = jsonify({'success': False, 'error': str(err)}), 205
 	

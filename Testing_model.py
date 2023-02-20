@@ -11,8 +11,8 @@ import argparse
 
 
 import os
-# rootdir = 'D:/FYP_code/FYP_MODEL_CODE_API/EXTRA/data_FYP_clean2/'
-rootdir ='/home/all/FYP_Model_code_API/EXTRA/data_FYP_clean2/'
+rootdir = 'D:/FYP_code/FYP_MODEL_CODE_API/EXTRA/data_FYP_clean2/'
+# rootdir ='/home/all/FYP_Model_code_API/EXTRA/'
 
 for subdir, dirs, files in os.walk(rootdir):
     for file in files:
@@ -20,9 +20,9 @@ for subdir, dirs, files in os.walk(rootdir):
         print(file)
         # print(img)
         try:
-            # imgPath=os.path.join(subdir, file)
-            imgPath='EXTRA/data_FYP_clean2/Aamir_Khan/'+file
-            imgPath=subdir+'/'+file
+            imgPath=os.path.join(subdir, file)
+            # imgPath='EXTRA/data_FYP_clean2/Aamir_Khan/'+file
+            # imgPath=subdir+'/'+file
             print(imgPath)
             # # if(imgPath=='D:/FYP_code/FYP_MODEL_CODE_API/EXTRA/data_FYP_clean\Aishwarya_Rai\6.jpg'):
             # my_img = cv2.imread(imgPath, cv2.IMREAD_UNCHANGED)
@@ -44,7 +44,7 @@ for subdir, dirs, files in os.walk(rootdir):
                     "location":"lab ICV",
                     "img":img
             }
-            print(data)
+            # print(data)
             response = requests.post(api_url, json=data,)
             print(response.json())
 
