@@ -96,7 +96,7 @@ app = Flask(__name__)
 myclient = pymongo.MongoClient("mongodb://localhost:27017/")
 
 # mydb = myclient["FaceRecog"]
-mydb = myclient["FaceRecog2"]
+mydb = myclient["FaceRecog"]
 
 collection=mydb["Users"]
 
