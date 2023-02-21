@@ -11,7 +11,8 @@ import argparse
 
 
 import os
-rootdir = 'D:/FYP_code/FYP_MODEL_CODE_API/EXTRA/data_FYP_clean2/'
+# rootdir = 'D:/FYP_code/FYP_MODEL_CODE_API/EXTRA/data_FYP_clean2/'
+rootdir = 'D:/FYP_code/FYP_MODEL_CODE_API/EXTRA/data_FYP_clean2/extra02'
 # rootdir ='/home/all/FYP_Model_code_API/EXTRA/'
 
 for subdir, dirs, files in os.walk(rootdir):
@@ -35,8 +36,8 @@ for subdir, dirs, files in os.walk(rootdir):
                 img = "data:image/jpeg;base64," + my_string.decode('utf-8') # b64.decode('utf-8')
                 # print(img)
 
-            api_url = "http://172.30.34.64:5000/findface"
-            # api_url = "http://127.0.0.1:5000/findface"
+            # api_url = "http://172.30.34.64:5000/findface"
+            api_url = "http://192.168.0.101:5000/findface"
             # print(api_url)
             
             data= {

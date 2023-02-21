@@ -91,7 +91,7 @@ class TimeStamp:
 
 
 model_name="Facenet512"#'ArcFace'
-matric_cosine= "Facenet512_cosine" #"ArcFace_cosine"
+matric_cosine="Facenet512_cosine" #"ArcFace_cosine"
 app = Flask(__name__)
 # app.config['MONGO_URI']="mongodb://localhost:27017/FaceRecog"
 # mongo=PyMongo(app)
@@ -401,7 +401,8 @@ def findfaceWrapper(req, trx_id = 0):
 	#-------------------------------------
 	#find out model
 
-	model_name = "ArcFace"; distance_metric = "cosine"; detector_backend = 'mtcnn'; location='unknown'
+	model_name = "Facenet512"#'ArcFace'
+	distance_metric = "cosine"; detector_backend = 'mtcnn'; location='unknown'
 
 	if "model_name" in list(req.keys()):
 		model_name = req["model_name"]
@@ -411,6 +412,8 @@ def findfaceWrapper(req, trx_id = 0):
 
 	if "detector_backend" in list(req.keys()):
 		detector_backend = req["detector_backend"]
+
+	model_name = "Facenet512"#'ArcFace'
 
 	#-------------------------------------
 	#retrieve images from request
@@ -453,13 +456,14 @@ def findfaceWrapper(req, trx_id = 0):
 		try:
 			tic3 =  time.time()
 
-			resultDf = DeepFace.find(face_img
+			resultDf = DeepFace.find(img
 				, db_path = "dataset_small"
 				, model_name = model_name
 				, distance_metric = distance_metric
 				, detector_backend = detector_backend
-				, silent=True
+				, silent=False
 			)
+			print("Result Df "+str(resultDf))
 
 			toc3 =  time.time()
 			print("FIND_FACE TIME:"+str(toc3-tic3))
@@ -506,12 +510,15 @@ def findfaceWrapper(req, trx_id = 0):
 					resp_obj['faceAdded']= 'true'
 
 					#for updating the embeddings
-					file_name="representations_arcface.pkl"
+					# file_name="representations_arcface.pkl"
+					file_name = "representations_%s.pkl" % (model_name)
+					file_name = file_name.replace("-", "_").lower()
+					print("filename: "+file_name)
 					db_path='dataset_small'
 					f = open(db_path+'/'+file_name, 'rb')
 					representations = pickle.load(f)
 					# img_path="dataset_small/ID10/image10.png"
-					rep= DeepFace.represent(save_path,model_name="ArcFace",detector_backend = 'mtcnn')
+					rep= DeepFace.represent(save_path,model_name=model_name,detector_backend = 'mtcnn')
 					instance=[]
 					instance.append(save_path)
 					instance.append(rep)
@@ -594,7 +601,7 @@ def resetMongoDb():
 	addAllUserInDb('dataset_small')
 
 if __name__ == '__main__':
-	# resetMongoDb()
+	resetMongoDb()
 	parser = argparse.ArgumentParser()
 	parser.add_argument(
 		'-p', '--port',
@@ -604,8 +611,8 @@ if __name__ == '__main__':
 	args = parser.parse_args()
 
 	#app.run(host='0.0.0.0', port=80,debug=False)
-	app.run(host='0.0.0.0', port=args.port,debug=True)
-	# app.run(host='192.168.0.104', port=5000,debug=False)
+	# app.run(host='0.0.0.0', port=args.port,debug=False)
+	app.run(host='192.168.0.101', port=5000,debug=False)
 	# app.run(host='0.0.0.0', port=args.port,debug=True)
 
 	# app.run( port=args.port,debug=True)
