@@ -90,8 +90,6 @@ class TimeStamp:
 
 
 
-model_name="Facenet512"#'ArcFace'
-matric_cosine="Facenet512_cosine" #"ArcFace_cosine"
 app = Flask(__name__)
 # app.config['MONGO_URI']="mongodb://localhost:27017/FaceRecog"
 # mongo=PyMongo(app)
@@ -101,7 +99,17 @@ myclient = pymongo.MongoClient("mongodb://localhost:27017/")
 # mydb = myclient["FaceRecog"]
 mydb = myclient["FaceRecog"]
 
-collection=mydb["Users"]
+
+
+
+
+model_name= "Facenet"# "SFace" # 'ArcFace' # "Facenet512"#
+matric_cosine="Facenet_cosine" #"SFace_cosine" # "ArcFace_cosine" # "Facenet512_cosine" #
+collection=mydb["Users-Facenet"]
+# collection=mydb["Users-Arcface"]
+# collection=mydb["Users-Facenet512"]
+# collection=mydb["Users"]
+# collection=mydb["facenet512"]
 
 #------------------------------
 
@@ -401,19 +409,19 @@ def findfaceWrapper(req, trx_id = 0):
 	#-------------------------------------
 	#find out model
 
-	model_name = "Facenet512"#'ArcFace'
+	# model_name = "Facenet512"#'ArcFace'
 	distance_metric = "cosine"; detector_backend = 'mtcnn'; location='unknown'
 
-	if "model_name" in list(req.keys()):
-		model_name = req["model_name"]
+	# if "model_name" in list(req.keys()):
+	# 	model_name = req["model_name"]
 	
-	if "location" in list(req.keys()):
-		location= req["location"]
+	# if "location" in list(req.keys()):
+	# 	location= req["location"]
 
-	if "detector_backend" in list(req.keys()):
-		detector_backend = req["detector_backend"]
+	# if "detector_backend" in list(req.keys()):
+	# 	detector_backend = req["detector_backend"]
 
-	model_name = "Facenet512"#'ArcFace'
+	# model_name = 'ArcFace' # "Facenet512"#
 
 	#-------------------------------------
 	#retrieve images from request

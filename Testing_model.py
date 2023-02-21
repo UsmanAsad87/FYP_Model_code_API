@@ -11,8 +11,8 @@ import argparse
 
 
 import os
-# rootdir = 'D:/FYP_code/FYP_MODEL_CODE_API/EXTRA/data_FYP_clean2/'
-rootdir = 'D:/FYP_code/FYP_MODEL_CODE_API/EXTRA/data_FYP_clean2/extra02'
+rootdir = 'D:/FYP_code/FYP_MODEL_CODE_API/EXTRA/data_FYP_clean2/'
+# rootdir = 'D:/FYP_code/FYP_MODEL_CODE_API/EXTRA/data_FYP_clean2/extra/'
 # rootdir ='/home/all/FYP_Model_code_API/EXTRA/'
 
 for subdir, dirs, files in os.walk(rootdir):
