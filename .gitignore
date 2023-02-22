@@ -5,3 +5,7 @@
 /dataset_small copy 2
 /dataset_small copy 3
 /dataset_small copy 4
+/dataset_small_arcface
+/dataset_small_sface
+/dataset_small_facenet
+/dataset_small_facenet512
