@@ -103,13 +103,16 @@ mydb = myclient["FaceRecog"]
 
 
 
-model_name= "Facenet"# "SFace" # 'ArcFace' # "Facenet512"#
-matric_cosine="Facenet_cosine" #"SFace_cosine" # "ArcFace_cosine" # "Facenet512_cosine" #
-collection=mydb["Users-Facenet"]
+model_name="DeepFace"#"Dlib"#"VGG-Face"#"OpenFace"#"Facenet"# "SFace" # 'ArcFace' # "Facenet512"#
+matric_cosine="DeepFace_cosine"#"Dlib_cosine"#"VGG-Face_cosine"#"OpenFace_cosine"#"Facenet_cosine" #"SFace_cosine" # "ArcFace_cosine" # "Facenet512_cosine" #
+collection=mydb["Users-DeepFace"]
+# collection=mydb["Users-Dlib"]
+# collection=mydb["Users-VGGFace"]
+# collection=mydb["Users-OpenFace"]
+# collection=mydb["Users-Facenet"]
 # collection=mydb["Users-Arcface"]
 # collection=mydb["Users-Facenet512"]
 # collection=mydb["Users"]
-# collection=mydb["facenet512"]
 
 #------------------------------
 
@@ -619,8 +622,8 @@ if __name__ == '__main__':
 	args = parser.parse_args()
 
 	#app.run(host='0.0.0.0', port=80,debug=False)
-	# app.run(host='0.0.0.0', port=args.port,debug=False)
-	app.run(host='192.168.0.101', port=5000,debug=False)
+	app.run(host='0.0.0.0', port=args.port,debug=False)
+	# app.run(host='192.168.0.101', port=5000,debug=False)
 	# app.run(host='0.0.0.0', port=args.port,debug=True)
 
 	# app.run( port=args.port,debug=True)

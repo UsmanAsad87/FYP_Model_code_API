@@ -9,3 +9,5 @@
 /dataset_small_sface
 /dataset_small_facenet
 /dataset_small_facenet512
+/dataset_small_vggFace
+/dataset_small_openface

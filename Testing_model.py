@@ -37,7 +37,8 @@ for subdir, dirs, files in os.walk(rootdir):
                 # print(img)
 
             # api_url = "http://172.30.34.64:5000/findface"
-            api_url = "http://192.168.0.101:5000/findface"
+            api_url = "http://10.25.28.166:5000/findface"
+            # api_url = "http://192.168.0.101:5000/findface"
             # print(api_url)
             
             data= {
