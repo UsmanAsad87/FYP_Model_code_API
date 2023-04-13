@@ -18,6 +18,7 @@ import matplotlib.image
 import pandas as pd
 import pickle
 from deepface.commons import functions
+from deepface.detectors import FaceDetector
 import pymongo
 import base64
 import numpy as np
@@ -25,9 +26,9 @@ from datetime import datetime
 
 
 
-from mtcnn.mtcnn import MTCNN
+# from mtcnn.mtcnn import MTCNN
 import cv2
-detector =MTCNN()
+# detector =MTCNN()
 
 
 
@@ -51,6 +52,18 @@ if tf_version == 2:
 from deepface import DeepFace
 
 #------------------------------
+
+import tensorflow as tf
+gpus = tf.config.experimental.list_physical_devices('GPU')
+if gpus:
+  # Restrict TensorFlow to only allocate memory on the first GPU
+  try:
+    tf.config.experimental.set_visible_devices(gpus[0], 'GPU')
+    tf.config.experimental.set_memory_growth(gpus[0], True)
+    print("GPU memory growth enabled")
+  except RuntimeError as e:
+    # Visible devices must be set before GPUs have been initialized
+    print(e)
 
 
 
@@ -379,24 +392,44 @@ def loadBase64Img(uri):
    img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
    return img
 
+# Using Retina face
 def extract_face(image, resize=(224, 224)):
-   faces = detector.detect_faces(image)
-   facesInb64=[]
-   for face in faces:
-    x1, y1, width, height = face['box']
-    x2, y2 = x1 + width, y1 + height
-    face_boundary = image[y1:y2, x1:x2]
-    face_image=cv2.resize(face_boundary,resize)
+	tic1 =  time.time()
+	detector_backend = 'retinaface'
+	face_detector = FaceDetector.build_model(detector_backend)
+	faces = FaceDetector.detect_faces(face_detector, detector_backend, image, align = False)
+	toc1 =  time.time()
+	print("Extract onlt time MTCNN:"+str(toc1-tic1))
 
-    res, frame = cv2.imencode('.jpg', face_image)   
-    b64 = base64.b64encode(frame) 
-    img = "data:image/jpeg;base64," + b64.decode('utf-8')
-    facesInb64.append(img)
+	facesInb64=[]
+	for face, (x, y, w, h) in faces:
+		if w > 130: #discard small detected faces
+			face_boundary = image[int(y):int(y+h), int(x):int(x+w)]
+			face_image=cv2.resize(face_boundary,resize)
+			res, frame = cv2.imencode('.jpg', face_image)   
+			b64 = base64.b64encode(frame) 
+			img = "data:image/jpeg;base64," + b64.decode('utf-8')
+			facesInb64.append(img)
 
-   return facesInb64
+	return facesInb64
 
+#///Using MTCNN
+# def extract_face(image, resize=(224, 224)):
+# 	tic1 =  time.time()
+# 	# faces = detector.detect_faces(image)
+# 	print("Extract onlt time MTCNN:"+str(toc1-tic1))
+# 	for face in faces:
+# 		x1, y1, width, height = face['box']
+# 		x2, y2 = x1 + width, y1 + height
+# 		face_boundary = image[y1:y2, x1:x2]
+# 		face_image=cv2.resize(face_boundary,resize)
 
+# 		res, frame = cv2.imencode('.jpg', face_image)   
+# 		b64 = base64.b64encode(frame) 
+# 		img = "data:image/jpeg;base64," + b64.decode('utf-8')
+# 		facesInb64.append(img)
 
+# 	return facesInb64
 
 def findfaceWrapper(req, trx_id = 0):
 
@@ -405,7 +438,7 @@ def findfaceWrapper(req, trx_id = 0):
 	#-------------------------------------
 	#find out model
 
-	model_name = "ArcFace"; distance_metric = "cosine"; detector_backend = 'mtcnn'; location='unknown'
+	model_name = "ArcFace"; distance_metric = "cosine"; detector_backend = 'retinaface'; location='unknown'
 
 	if "model_name" in list(req.keys()):
 		model_name = req["model_name"]
@@ -453,7 +486,9 @@ def findfaceWrapper(req, trx_id = 0):
 	face_imgs=extract_face(img2)
 	toc2 = time.time()
 	print("extract_faces TIME:"+str(toc2-tic2))
+
 	for face_img in face_imgs:
+		
 		try:
 			tic3 =  time.time()
 
@@ -499,7 +534,7 @@ def findfaceWrapper(req, trx_id = 0):
 				if(face):
 					resp_obj['HasFace']= face
 					resp_obj['face_found']= 'true'
-					faceImg = DeepFace.detectFace(img_path = face_img, target_size=(224, 224), enforce_detection = False, detector_backend = 'mtcnn', align = True)
+					faceImg = DeepFace.detectFace(img_path = face_img, target_size=(224, 224), enforce_detection = False, detector_backend = 'retinaface', align = True)
 					count=fcount('dataset_small/')
 					newpath = 'dataset_small/ID'+str(count)  
 					if not os.path.exists(newpath):
@@ -516,7 +551,7 @@ def findfaceWrapper(req, trx_id = 0):
 					f = open(db_path+'/'+file_name, 'rb')
 					representations = pickle.load(f)
 					# img_path="dataset_small/ID10/image10.png"
-					rep= DeepFace.represent(save_path,model_name="ArcFace",detector_backend = 'mtcnn')
+					rep= DeepFace.represent(save_path,model_name="ArcFace",detector_backend = 'retinaface')
 					instance=[]
 					instance.append(save_path)
 					instance.append(rep)
@@ -595,11 +630,12 @@ def addTimeStampOfUser(imgurl,location,img):
 def resetMongoDb():
 	# dictionary={"name":"usman","marks":20}
 	# collection.insert_one(dictionary)
-	collection.delete_many({})
-	addAllUserInDb('dataset_small')
+	# collection.delete_many({})
+	# addAllUserInDb('dataset_small')
+	collection.delete_one({"name":"ID13"})
 
 if __name__ == '__main__':
-	# resetMongoDb()
+	resetMongoDb()
 	parser = argparse.ArgumentParser()
 	parser.add_argument(
 		'-p', '--port',
@@ -609,7 +645,7 @@ if __name__ == '__main__':
 	args = parser.parse_args()
 
 	#app.run(host='0.0.0.0', port=80,debug=False)
-	app.run(host='0.0.0.0', port=args.port,debug=True)
+	app.run(host='0.0.0.0', port=args.port,debug=True,threaded=True)
 	# app.run(host='192.168.0.104', port=5000,debug=False)
 	# app.run(host='0.0.0.0', port=args.port,debug=True)
 
