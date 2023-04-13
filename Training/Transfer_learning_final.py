@@ -54,7 +54,7 @@ def transfer_learning():
     batch_size = 32
     img_height = 112
     img_width = 112
-    data_dir ='dataset_FYP_clean'
+    data_dir ='EXTRA/data_FYP_clean2'
     train_ds = tf.keras.utils.image_dataset_from_directory(
                 data_dir,
                 validation_split=0.2,
