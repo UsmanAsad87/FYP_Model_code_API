@@ -680,6 +680,7 @@ def find(img_path, db_path, model_name ='VGG-Face', distance_metric = 'cosine', 
 			#----------------------------------
 
 			if model_name == 'Ensemble':
+				print("here1")
 
 				feature_names = []
 				for j in model_names:
@@ -769,8 +770,8 @@ def represent(img_path, model_name = 'VGG-Face', model = None, enforce_detection
 
 	#detect and align
 	# print(img_path)
-	img = functions.preprocess_face(img = img_path
-		, target_size=(input_shape_y, input_shape_x)
+	img = functions.preprocess_face(img = img_path,
+		 target_size=(input_shape_y, input_shape_x)
 		, enforce_detection = enforce_detection
 		, detector_backend = detector_backend
 		, align = align)

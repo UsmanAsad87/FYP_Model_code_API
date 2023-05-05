@@ -181,3 +181,20 @@ font-family:Century Gothic, sans-serif;">
     Copy rights reserved
   </div>
 {% endblock body %}
+
+
+{% block dbListen %}
+<script src="/socket.io/socket.io.js"></script>
+<script type="text/javascript" charset="utf-8">
+  var socket = io();
+
+  socket.on('connect', function() {
+    console.log('Connected to server!');
+  });
+
+  socket.on('data', function(data) {
+    console.log('Received data from server:', data);
+    // Do something with the data
+  });
+</script>
+{% endblock dbListen %}

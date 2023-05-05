@@ -11,8 +11,10 @@ import argparse
 
 
 import os
-rootdir = 'D:/FYP_code/FYP_MODEL_CODE_API/EXTRA/data_FYP_clean2/'
+# rootdir = 'D:/FYP_code/FYP_MODEL_CODE_API/EXTRA/Faces/'
+# rootdir = 'D:/FYP_code/FYP_MODEL_CODE_API/EXTRA/data_FYP_clean2/'
 # rootdir = 'D:/FYP_code/FYP_MODEL_CODE_API/EXTRA/data_FYP_clean2/extra/'
+rootdir ='D:/FYP_code/FYP_Model_code_API/dataset_small_facenet_4id/'
 # rootdir ='/home/all/FYP_Model_code_API/EXTRA/'
 
 for subdir, dirs, files in os.walk(rootdir):
@@ -36,9 +38,10 @@ for subdir, dirs, files in os.walk(rootdir):
                 img = "data:image/jpeg;base64," + my_string.decode('utf-8') # b64.decode('utf-8')
                 # print(img)
 
+
             # api_url = "http://172.30.34.64:5000/findface"
-            api_url = "http://10.25.28.166:5000/findface"
-            # api_url = "http://192.168.0.101:5000/findface"
+            api_url = "http://10.25.28.127:5000/findface"
+            # api_url = "http://192.168.0.100:5000/findface"
             # print(api_url)
             
             data= {

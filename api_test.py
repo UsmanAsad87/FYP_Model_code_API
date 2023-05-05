@@ -32,6 +32,7 @@ detector =MTCNN()
 
 
 from flask import redirect,url_for ,render_template
+from flask_socketio import SocketIO, emit
 
 
 
@@ -101,17 +102,21 @@ mydb = myclient["FaceRecog"]
 
 
 
-
-
-model_name="DeepFace"#"Dlib"#"VGG-Face"#"OpenFace"#"Facenet"# "SFace" # 'ArcFace' # "Facenet512"#
-matric_cosine="DeepFace_cosine"#"Dlib_cosine"#"VGG-Face_cosine"#"OpenFace_cosine"#"Facenet_cosine" #"SFace_cosine" # "ArcFace_cosine" # "Facenet512_cosine" #
-collection=mydb["Users-DeepFace"]
+# faceDb=''
+model_name= 'ArcFace' #"DeepFace"#"Dlib"#"VGG-Face"#"OpenFace"#"Facenet"# "SFace" # 'ArcFace' # "Facenet512"#
+matric_cosine="ArcFace_cosine" #"DeepFace_cosine"#"Dlib_cosine"#"VGG-Face_cosine"#"OpenFace_cosine"#"Facenet_cosine" #"SFace_cosine" # "ArcFace_cosine" # "Facenet512_cosine" #
+# collection=mydb["Users-DeepFace"]
 # collection=mydb["Users-Dlib"]
 # collection=mydb["Users-VGGFace"]
 # collection=mydb["Users-OpenFace"]
 # collection=mydb["Users-Facenet"]
 # collection=mydb["Users-Arcface"]
+# collection=mydb["Users-Arcface-grayscale"]
+# collection=mydb["Users-Arcface-westFaces"]
+# collection=mydb["Users-Arcface-uni"]
 # collection=mydb["Users-Facenet512"]
+collection=mydb["Users-arcface-on-facenet-4id"]
+# collection=mydb["Users-Facenet512-4id"]
 # collection=mydb["Users"]
 
 #------------------------------
@@ -449,20 +454,23 @@ def findfaceWrapper(req, trx_id = 0):
 
 
     
-	resultDf=pd.DataFrame()
-
-	#Just to check
-
-	tic1 =  time.time()
-	img2=loadBase64Img(img)
-	toc1 =  time.time()
-	print("loadBase64Img TIME:"+str(toc1-tic1))
+	# resultDf=pd.DataFrame()
+	face_imgs=[]
+	face_imgs.append(img)
 	resp_all={}
+
+	# #Just to check
+
+	# tic1 =  time.time()
+	# img2=loadBase64Img(img)
+	# toc1 =  time.time()
+	# print("loadBase64Img TIME:"+str(toc1-tic1))
+	# resp_all={}
 	
-	tic2 = time.time()
-	face_imgs=extract_face(img2)
-	toc2 = time.time()
-	print("extract_faces TIME:"+str(toc2-tic2))
+	# tic2 = time.time()
+	# face_imgs=extract_face(img2)
+	# toc2 = time.time()
+	# print("extract_faces TIME:"+str(toc2-tic2))
 	for face_img in face_imgs:
 		try:
 			tic3 =  time.time()
@@ -621,9 +629,9 @@ if __name__ == '__main__':
 		help='Port of serving api')
 	args = parser.parse_args()
 
-	#app.run(host='0.0.0.0', port=80,debug=False)
-	app.run(host='0.0.0.0', port=args.port,debug=False)
-	# app.run(host='192.168.0.101', port=5000,debug=False)
+	# app.run(host='0.0.0.0', port=80,debug=False)
+	app.run(host='192.168.0.105', port=args.port,debug=False)
+	# app.run(host='192.168.0.100', port=5000,debug=False)
 	# app.run(host='0.0.0.0', port=args.port,debug=True)
 
 	# app.run( port=args.port,debug=True)
