@@ -23,6 +23,7 @@ import pymongo
 import base64
 import numpy as np
 from datetime import datetime
+import uuid
 
 
 
@@ -69,22 +70,25 @@ if gpus:
 
 
 class User:
-	def __init__(self, id,recentTime,recentLocation, timeStamps, imgUrl):
+	def __init__(self, id,name,recentTime,recentLocation, timeStamps, imgUrl):
 		self.id = id
+		self.name = name
 		self.recentLocation = recentLocation
 		self.timeStamps= timeStamps
 		self.imgUrl = imgUrl
 		self.recentTime = recentTime
 
 	def __init__(self, item):
-		self.id = item['name']
+		self.id = item['id']
+		self.name = item['name']
 		self.recentLocation ='' if "none" in item['recent_location'] else item['recent_location']
 		self.timeStamps= item['timeStamps']
 		self.imgUrl ="data:image/png;base64,"+ item["imgUrl"]
 		self.recentTime = '' if item['recent_timeStamp']==datetime.min else item['recent_timeStamp'].strftime("%m/%d/%Y, %H:%M:%S")
 
 	def __init__(self, item,stamps):
-		self.id = item['name']
+		self.id = item['id']
+		self.name = item['name']
 		self.recentLocation ='' if "none" in item['recent_location'] else item['recent_location']
 		self.timeStamps= stamps
 		self.imgUrl ="data:image/png;base64,"+ item["imgUrl"]
@@ -151,7 +155,7 @@ def view():
 
 @app.route('/details/<string:id>',methods=['GET','POST'])
 def details(id):
-	user=collection.find_one({"name":id})
+	user=collection.find_one({"id":id})
 	stamps=[]
 	for item in user['timeStamps']:
 		stamp=TimeStamp(item)
@@ -536,11 +540,13 @@ def findfaceWrapper(req, trx_id = 0):
 					resp_obj['face_found']= 'true'
 					faceImg = DeepFace.detectFace(img_path = face_img, target_size=(224, 224), enforce_detection = False, detector_backend = 'retinaface', align = True)
 					count=fcount('dataset_small/')
-					newpath = 'dataset_small/ID'+str(count)  
+					count = uuid.uuid1()
+					print(count)
+					newpath = 'dataset_small/'+str(count)  
 					if not os.path.exists(newpath):
 						os.makedirs(newpath)
 
-					save_path='dataset_small/ID'+str(count)+'/image'+str(count)+'.png'
+					save_path='dataset_small/'+str(count)+'/image'+str(count)+'.png'
 					resp_obj['imgurl']= save_path
 					matplotlib.image.imsave(save_path, faceImg)
 					resp_obj['faceAdded']= 'true'
@@ -550,7 +556,7 @@ def findfaceWrapper(req, trx_id = 0):
 					db_path='dataset_small'
 					f = open(db_path+'/'+file_name, 'rb')
 					representations = pickle.load(f)
-					# img_path="dataset_small/ID10/image10.png"
+					# img_path="dataset_small/10/image10.png"
 					rep= DeepFace.represent(save_path,model_name="ArcFace",detector_backend = 'retinaface')
 					instance=[]
 					instance.append(save_path)
@@ -561,6 +567,7 @@ def findfaceWrapper(req, trx_id = 0):
 					f.close()
 					ID=save_path.split("/")
 					print(ID[1])
+					name = ID[1].split("-")[0]
 					
 					now=datetime.now()
 					#location="lab"
@@ -569,7 +576,7 @@ def findfaceWrapper(req, trx_id = 0):
 					with open(save_path, "rb") as img_file:
 						my_string = base64.b64encode(img_file.read())
 
-					rec={"name":ID[1],"imgUrl":my_string.decode("utf-8"),"timeStamps":[timeStamp,],'recent_timeStamp':now,'recent_location':location}
+					rec={"name":name,"id":ID[1],"imgUrl":my_string.decode("utf-8"),"timeStamps":[timeStamp,],'recent_timeStamp':now,'recent_location':location}
 					collection.insert_one(rec)
 
 				else:
@@ -603,7 +610,7 @@ def addAllUserInDb(path):
 			imgpath=os.path.join(path, item,filename[0])
 			with open(imgpath, "rb") as img_file:
 				my_string = base64.b64encode(img_file.read())
-			rec={"name":item,"imgUrl":my_string.decode("utf-8"),"recent_timeStamp":datetime.min,'recent_location':'none',"timeStamps":[]}
+			rec={"name":item.split("-")[0],"id":item,"imgUrl":my_string.decode("utf-8"),"recent_timeStamp":datetime.min,'recent_location':'none',"timeStamps":[]}
 			collection.insert_one(rec)
 
 def addTimeStampOfUser(imgurl,location,img):
@@ -612,7 +619,7 @@ def addTimeStampOfUser(imgurl,location,img):
 	#print(imgurl)
 	#print(ID[1])
 	print(ID[1])
-	one=collection.find_one({"name":ID[1]})
+	one=collection.find_one({"id":ID[1]})
 	# print(one)
 	timeStamps=one["timeStamps"]
 	now=datetime.now()
@@ -622,7 +629,7 @@ def addTimeStampOfUser(imgurl,location,img):
 	timeStamp={"time":now,"location":location,'img':img}
 	timeStamps.append(timeStamp)
 	# print(timeStamp)
-	prev={"name":ID[1]}
+	prev={"id":ID[1]}
 	nextt={"$set":{"timeStamps":timeStamps,"recent_timeStamp":now,'recent_location':location}}
 	up=collection.update_many(prev,nextt)
 	print(up.modified_count)
@@ -630,9 +637,9 @@ def addTimeStampOfUser(imgurl,location,img):
 def resetMongoDb():
 	# dictionary={"name":"usman","marks":20}
 	# collection.insert_one(dictionary)
-	# collection.delete_many({})
-	# addAllUserInDb('dataset_small')
-	collection.delete_one({"name":"ID13"})
+	collection.delete_many({})
+	addAllUserInDb('dataset_small')
+	# collection.delete_one({"name":"ID13"})
 
 if __name__ == '__main__':
 	resetMongoDb()
@@ -645,8 +652,8 @@ if __name__ == '__main__':
 	args = parser.parse_args()
 
 	#app.run(host='0.0.0.0', port=80,debug=False)
-	app.run(host='0.0.0.0', port=args.port,debug=True,threaded=True)
-	# app.run(host='192.168.0.104', port=5000,debug=False)
+	# app.run(host='0.0.0.0', port=args.port,debug=True,threaded=True)
+	app.run(host='192.168.0.106', port=5000,debug=False)
 	# app.run(host='0.0.0.0', port=args.port,debug=True)
 
 	# app.run( port=args.port,debug=True)
