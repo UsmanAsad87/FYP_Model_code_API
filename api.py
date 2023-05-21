@@ -191,6 +191,19 @@ def update(id):
 		stamp=TimeStamp(item)
 		stamps.append(stamp)
 	userData= User(user,stamps)
+
+	if request.method == 'POST':
+		name = request.form.get('name')
+
+		if  not name:
+			return render_template('update.html',user=userData, alert_message="Please provide updated name of person.")
+		
+		prev={"id":id}
+		nextt={"$set":{"name":name}}
+		up=collection.update_many(prev,nextt)
+		print(up.modified_count)
+		return render_template('update.html',user=userData, alert_message="Name updated successfully.")
+		
 	return render_template('update.html',user=userData)
 
 
