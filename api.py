@@ -167,6 +167,30 @@ def details(id):
 	# 	print(st.time)
 	return render_template('details.html',user=userData)
 
+@app.route('/delete/<string:id>',methods=['GET','POST'])
+def delete(id):
+	save_path = 'dataset_small/' + id + '/image' + id + '.png'
+	file_name = "representations_arcface.pkl"
+	db_path = 'dataset_small'
+
+	# Load existing representations
+	with open(os.path.join(db_path, file_name), 'rb') as f:
+		representations = pickle.load(f)
+
+	# Find and remove the instance with the specified save_path
+	for instance in representations:
+		if instance[0] == save_path:
+			representations.remove(instance)
+			break
+
+	# Save updated representations
+	with open(os.path.join(db_path, file_name), 'wb') as f:
+		pickle.dump(representations, f)
+
+	collection.delete_one({"id":id})
+	
+	return redirect('/')
+
 @app.route('/add_person',methods=['GET','POST'])
 def addPerson():
 	if request.method == 'POST':
@@ -686,7 +710,7 @@ if __name__ == '__main__':
 
 	#app.run(host='0.0.0.0', port=80,debug=False)
 	# app.run(host='0.0.0.0', port=args.port,debug=True,threaded=True)
-	app.run(host='192.168.0.106', port=5000,debug=True)
+	app.run(host='192.168.0.106', port=5000,debug=False)
 	# app.run(host='0.0.0.0', port=args.port,debug=True)
 
 	# app.run( port=args.port,debug=True)
