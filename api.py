@@ -168,7 +168,6 @@ def details(id):
 	return render_template('details.html',user=userData)
 
 @app.route('/add_person',methods=['GET','POST'])
-
 def addPerson():
 	if request.method == 'POST':
 		newcomer = request.files.get('newcomer')
@@ -182,6 +181,18 @@ def addPerson():
 		
 		
 	return render_template('add_person.html')
+
+
+@app.route('/update/<string:id>',methods=['GET','POST'])
+def update(id):
+	user=collection.find_one({"id":id})
+	stamps=[]
+	for item in user['timeStamps']:
+		stamp=TimeStamp(item)
+		stamps.append(stamp)
+	userData= User(user,stamps)
+	return render_template('update.html',user=userData)
+
 
 @app.route('/findface', methods=['POST'])
 def findface():
