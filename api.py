@@ -23,6 +23,7 @@ import pymongo
 import base64
 import numpy as np
 from datetime import datetime
+import uuid
 
 
 
@@ -69,22 +70,25 @@ if gpus:
 
 
 class User:
-	def __init__(self, id,recentTime,recentLocation, timeStamps, imgUrl):
+	def __init__(self, id,name,recentTime,recentLocation, timeStamps, imgUrl):
 		self.id = id
+		self.name = name
 		self.recentLocation = recentLocation
 		self.timeStamps= timeStamps
 		self.imgUrl = imgUrl
 		self.recentTime = recentTime
 
 	def __init__(self, item):
-		self.id = item['name']
+		self.id = item['id']
+		self.name = item['name']
 		self.recentLocation ='' if "none" in item['recent_location'] else item['recent_location']
 		self.timeStamps= item['timeStamps']
 		self.imgUrl ="data:image/png;base64,"+ item["imgUrl"]
 		self.recentTime = '' if item['recent_timeStamp']==datetime.min else item['recent_timeStamp'].strftime("%m/%d/%Y, %H:%M:%S")
 
 	def __init__(self, item,stamps):
-		self.id = item['name']
+		self.id = item['id']
+		self.name = item['name']
 		self.recentLocation ='' if "none" in item['recent_location'] else item['recent_location']
 		self.timeStamps= stamps
 		self.imgUrl ="data:image/png;base64,"+ item["imgUrl"]
@@ -151,7 +155,7 @@ def view():
 
 @app.route('/details/<string:id>',methods=['GET','POST'])
 def details(id):
-	user=collection.find_one({"name":id})
+	user=collection.find_one({"id":id})
 	stamps=[]
 	for item in user['timeStamps']:
 		stamp=TimeStamp(item)
@@ -162,6 +166,22 @@ def details(id):
 	# for st in userData.timeStamps:
 	# 	print(st.time)
 	return render_template('details.html',user=userData)
+
+@app.route('/add_person',methods=['GET','POST'])
+
+def addPerson():
+	if request.method == 'POST':
+		newcomer = request.files.get('newcomer')
+		name = request.form.get('name')
+
+		if not newcomer or not name:
+			return render_template('add_person.html', alert_message="Please provide the image and name of person.")
+		
+		
+		return addPerson(img=newcomer,personName=name)
+		
+		
+	return render_template('add_person.html')
 
 @app.route('/findface', methods=['POST'])
 def findface():
@@ -226,7 +246,7 @@ def searchByImg(img):
 		, db_path = 'dataset_small'
 		, model_name = 'ArcFace'
 		, distance_metric = 'cosine'
-		, detector_backend = 'mtcnn'
+		, detector_backend = 'retinaface'
 		, silent=True
 	)
 	except Exception as err:
@@ -271,54 +291,94 @@ def searchByImg(img):
 		print(Docs)
 		return render_template('index.html',allTodo=Docs)
 
+def addPerson(img,personName):
+	if img.filename=='':
+		return render_template('add_person.html', alert_message="Image has no file name.")
 
-			# imgurl=topMatchDf['identity'][0]
-			# imgurl= imgurl.replace("\\", "/")
-			# ID=imgurl.split("/")
-			# user=collection.find_one({"name":ID[1]})
-			# print(user==None)
-			# #if no user is found then this will run
-			# if(user==None):
-			# 	return render_template('index.html',allTodo=[])
+	filename=img.filename.split(".")
+	name=filename[0]
+	ext=filename[1]
+	img_bytes = img.read()
+	encoded_string = base64.b64encode(img_bytes)
+	str_encoded_string=str(encoded_string)
+	str_encoded_string=str_encoded_string[2:]
+	instance='data:image/'+ext+';base64,'+str_encoded_string
+	instance=instance[:-1]
+	resultDf=pd.DataFrame()
+	try:
+		resultDf = DeepFace.find(instance
+		, db_path = 'dataset_small'
+		, model_name = 'ArcFace'
+		, distance_metric = 'cosine'
+		, detector_backend = 'retinaface'
+		, silent=True
+	)
+	except Exception as err:
+		return render_template('add_person.html', alert_message="Some error occured.")
+	
+	
+	if resultDf.empty:
+		return addPersonHelper(img=instance,personName=personName)
+	else:
+		for index, row in resultDf.iterrows():
+			if row["ArcFace_cosine"] < 0.56:
+				return render_template('add_person.html', alert_message="Person Already exist.")
 
-			
-			
-			# stamps=[]
-			# for item in user['timeStamps']:
-			# 	stamp=TimeStamp(item)
-			# 	stamps.append(stamp)
-			# 	print("DATA: "+stamp.location+" "+stamp.time+"  ")
-			# userData= User(user,stamps)
-			# Docs.append(userData)
-		
-		return render_template('index.html',allTodo=Docs)
+		return addPersonHelper(img=instance,personName=personName)
+
+def addPersonHelper(img,personName):
+
+	model_name = "ArcFace"; distance_metric = "cosine"; detector_backend = 'retinaface'
+	resultDf=pd.DataFrame()
+	img2=loadBase64Img(img)
+	resp_all={}
+	face_imgs=extract_face(img2)
+
+	if(len(face_imgs)>1):
+		return render_template('add_person.html', alert_message="Image consist multiple faces kindly upload another image.")
+	if(len(face_imgs)==0):
+		return render_template('add_person.html', alert_message="Image has no face of person.")
+
+	for face_img in face_imgs:
+		try:	
+			faceImg = DeepFace.detectFace(img_path = face_img, target_size=(224, 224), enforce_detection = False, detector_backend = 'retinaface', align = True)
+			count=fcount('dataset_small/')
+			count = uuid.uuid1()
+			newpath = 'dataset_small/'+str(count)  
+			if not os.path.exists(newpath):
+				os.makedirs(newpath)
+
+			save_path='dataset_small/'+str(count)+'/image'+str(count)+'.png'
+			matplotlib.image.imsave(save_path, faceImg)
+			#for updating the embeddings
+			file_name="representations_arcface.pkl"
+			db_path='dataset_small'
+			f = open(db_path+'/'+file_name, 'rb')
+			representations = pickle.load(f)
+			rep= DeepFace.represent(save_path,model_name="ArcFace",detector_backend = 'retinaface')
+			instance=[]
+			instance.append(save_path)
+			instance.append(rep)
+			representations.append(instance)
+			f = open(db_path+'/'+file_name, "wb")
+			pickle.dump(representations, f)
+			f.close()
+			ID=save_path.split("/")
 
 
-		#WORKING
-		# print(resultDf)
-		# print(resultDf['identity'][0])
-		# topMatchDf=resultDf.nsmallest(1, 'ArcFace_cosine')
-		# imgurl=topMatchDf['identity'][0]
-		# imgurl= imgurl.replace("\\", "/")
-		# ID=imgurl.split("/")
-		# user=collection.find_one({"name":ID[1]})
-		# print(user==None)
-		# #if no user is found then this will run
-		# if(user==None):
-		# 	return render_template('index.html',allTodo=[])
+			with open(save_path, "rb") as img_file:
+				my_string = base64.b64encode(img_file.read())
 
-		# #if user record is found	
-		# Docs=[]	
-		# stamps=[]
-		# for item in user['timeStamps']:
-		# 	stamp=TimeStamp(item)
-		# 	stamps.append(stamp)
-		# 	print("DATA: "+stamp.location+" "+stamp.time+"  ")
-		# userData= User(user,stamps)
-		# Docs.append(userData)
-		# for st in userData.timeStamps:
-		# 	print(st.time)
-		# return render_template('index.html',allTodo=Docs)
+			rec={"name":personName,"id":ID[1],"imgUrl":my_string.decode("utf-8"),"recent_timeStamp":datetime.min,'recent_location':'none',"timeStamps":[]}
+			collection.insert_one(rec)
+
+
+		except Exception as err:
+			return render_template('add_person.html', alert_message="Some error occured while adding person.")
+
+	
+	return render_template('add_person.html', success_message="Person added successfully.")
+
 
 def searchByName(name):
 	#if search query is empty
@@ -342,46 +402,6 @@ def searchByName(name):
 	for st in userData.timeStamps:
 		print(st.time)
 	return render_template('index.html',allTodo=Docs)
-
-
-
-
-
-# # @app.route('/view')
-# # def view():
-# # 	allDocs=collection.find({},{"name":1,"_id":0,'recent_location':1,'recent_timeStamp':1,'timeStamps':1}).sort('recent_timeStamp',-1).limit(2)
-# # 	for item in allDocs:
-# # 		#print(item)
-# # 		print("DATA:")
-# # 		print(item['name'])
-# # 		print(item['recent_location'])
-# # 		a=item['recent_timeStamp']
-# # 		print("year =", a.year)
-# # 		print("month =", a.month)
-# # 		print("day =", a.day)
-# # 		print("hour =", a.hour)
-# # 		print("minute =", a.minute)
-# # 		for stamps in item['timeStamps']: 
-# # 			print(stamps)
-# # 			m=stamps['time']
-# # 			print("year =", m.year)
-# # 			print("month =", m.month)
-# # 			print("day =", m.day)
-# # 			print("hour =", m.hour)
-# # 			print("minute =", m.minute)
-		
-
-# 	# for item in allDocs:
-# 	# 	if  not ('none' in item["recent_timeStamp"]):
-# 	# 		print(item)
-# 	# for item in allDocs:
-# 	# 	if 'none' in item["recent_timeStamp"]:
-# 	# 		print(item)
-# 	return '<h1>Welcome to our face recognizer!</h1>'
-# # @app.route('/1')
-# # def welcome1():
-# #     return render_template('index.html')
-
 
 
 
@@ -465,13 +485,6 @@ def findfaceWrapper(req, trx_id = 0):
 		print("invalid image passed!")
 		return jsonify({'success': False, 'error': 'you must pass img as base64 encoded string'}), 205
 
-#add for loop to iterate for searching the faces and call the below code on it
-	#-------------------------------------
-	#call represent function from the interface
-
-
-
-    
 	resultDf=pd.DataFrame()
 
 	#Just to check
@@ -536,11 +549,13 @@ def findfaceWrapper(req, trx_id = 0):
 					resp_obj['face_found']= 'true'
 					faceImg = DeepFace.detectFace(img_path = face_img, target_size=(224, 224), enforce_detection = False, detector_backend = 'retinaface', align = True)
 					count=fcount('dataset_small/')
-					newpath = 'dataset_small/ID'+str(count)  
+					count = uuid.uuid1()
+					print(count)
+					newpath = 'dataset_small/'+str(count)  
 					if not os.path.exists(newpath):
 						os.makedirs(newpath)
 
-					save_path='dataset_small/ID'+str(count)+'/image'+str(count)+'.png'
+					save_path='dataset_small/'+str(count)+'/image'+str(count)+'.png'
 					resp_obj['imgurl']= save_path
 					matplotlib.image.imsave(save_path, faceImg)
 					resp_obj['faceAdded']= 'true'
@@ -550,7 +565,7 @@ def findfaceWrapper(req, trx_id = 0):
 					db_path='dataset_small'
 					f = open(db_path+'/'+file_name, 'rb')
 					representations = pickle.load(f)
-					# img_path="dataset_small/ID10/image10.png"
+					# img_path="dataset_small/10/image10.png"
 					rep= DeepFace.represent(save_path,model_name="ArcFace",detector_backend = 'retinaface')
 					instance=[]
 					instance.append(save_path)
@@ -561,6 +576,7 @@ def findfaceWrapper(req, trx_id = 0):
 					f.close()
 					ID=save_path.split("/")
 					print(ID[1])
+					name = ID[1].split("-")[0]
 					
 					now=datetime.now()
 					#location="lab"
@@ -569,7 +585,7 @@ def findfaceWrapper(req, trx_id = 0):
 					with open(save_path, "rb") as img_file:
 						my_string = base64.b64encode(img_file.read())
 
-					rec={"name":ID[1],"imgUrl":my_string.decode("utf-8"),"timeStamps":[timeStamp,],'recent_timeStamp':now,'recent_location':location}
+					rec={"name":name,"id":ID[1],"imgUrl":my_string.decode("utf-8"),"timeStamps":[timeStamp,],'recent_timeStamp':now,'recent_location':location}
 					collection.insert_one(rec)
 
 				else:
@@ -603,7 +619,7 @@ def addAllUserInDb(path):
 			imgpath=os.path.join(path, item,filename[0])
 			with open(imgpath, "rb") as img_file:
 				my_string = base64.b64encode(img_file.read())
-			rec={"name":item,"imgUrl":my_string.decode("utf-8"),"recent_timeStamp":datetime.min,'recent_location':'none',"timeStamps":[]}
+			rec={"name":item.split("-")[0],"id":item,"imgUrl":my_string.decode("utf-8"),"recent_timeStamp":datetime.min,'recent_location':'none',"timeStamps":[]}
 			collection.insert_one(rec)
 
 def addTimeStampOfUser(imgurl,location,img):
@@ -612,7 +628,7 @@ def addTimeStampOfUser(imgurl,location,img):
 	#print(imgurl)
 	#print(ID[1])
 	print(ID[1])
-	one=collection.find_one({"name":ID[1]})
+	one=collection.find_one({"id":ID[1]})
 	# print(one)
 	timeStamps=one["timeStamps"]
 	now=datetime.now()
@@ -622,7 +638,7 @@ def addTimeStampOfUser(imgurl,location,img):
 	timeStamp={"time":now,"location":location,'img':img}
 	timeStamps.append(timeStamp)
 	# print(timeStamp)
-	prev={"name":ID[1]}
+	prev={"id":ID[1]}
 	nextt={"$set":{"timeStamps":timeStamps,"recent_timeStamp":now,'recent_location':location}}
 	up=collection.update_many(prev,nextt)
 	print(up.modified_count)
@@ -630,9 +646,9 @@ def addTimeStampOfUser(imgurl,location,img):
 def resetMongoDb():
 	# dictionary={"name":"usman","marks":20}
 	# collection.insert_one(dictionary)
-	# collection.delete_many({})
-	# addAllUserInDb('dataset_small')
-	collection.delete_one({"name":"ID13"})
+	collection.delete_many({})
+	addAllUserInDb('dataset_small')
+	# collection.delete_one({"name":"ID13"})
 
 if __name__ == '__main__':
 	resetMongoDb()
@@ -645,8 +661,8 @@ if __name__ == '__main__':
 	args = parser.parse_args()
 
 	#app.run(host='0.0.0.0', port=80,debug=False)
-	app.run(host='0.0.0.0', port=args.port,debug=True,threaded=True)
-	# app.run(host='192.168.0.104', port=5000,debug=False)
+	# app.run(host='0.0.0.0', port=args.port,debug=True,threaded=True)
+	app.run(host='192.168.0.106', port=5000,debug=True)
 	# app.run(host='0.0.0.0', port=args.port,debug=True)
 
 	# app.run( port=args.port,debug=True)

@@ -100,9 +100,6 @@ font-family:Century Gothic, sans-serif;">
 </br>
 <div >
   <form class="row g-3" action = "/" method = "POST" enctype = "multipart/form-data">
-    <!-- <h3>Add a picture of person to locate</h3>
-    <input type = "file" name = "newcomer" accept="image/ /><br>
-    <input type = "submit" value = "submit" /><br> -->
     <div class="col-auto">
     <input type = "file" class="form-control"  name = "newcomer" id="newcomer" accept="image" /><br>
   </div>
@@ -116,6 +113,12 @@ font-family:Century Gothic, sans-serif;">
 <div style="margin-top:40px ;">
   <form action="/">
   <button type="submit" class="btn btn-dark">Refresh</button>
+  </form>
+  
+</div>
+<div style="margin-top:40px ;">
+  <form action="/add_person">
+  <button type="submit" class="btn btn-dark">Add Person</button>
   </form>
 </div>
 </br>
@@ -156,7 +159,7 @@ font-family:Century Gothic, sans-serif;">
         <th scope="row">{{loop.index}}</th>
         {% set testing = todo.imgUrl %}
         <td><img src="{{ testing }}" id="img" alt="Red dot" width="100" height="100" /></td>
-        <td>{{todo.id}}</td>
+        <td>{{todo.name}}</td>
         <td>{{todo.recentTime}}</td>
         <td>{{todo.recentLocation}}</td>
         <td>
