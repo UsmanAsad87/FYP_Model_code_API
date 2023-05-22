@@ -8,7 +8,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 from flask import Flask, jsonify, request, make_response,render_template,redirect
 
-
+import shutil
 import argparse
 import uuid
 import json
@@ -171,6 +171,7 @@ def details(id):
 def delete(id):
 	save_path = 'dataset_small/' + id + '/image' + id + '.png'
 	file_name = "representations_arcface.pkl"
+	folder_path= 'dataset_small/' + id 
 	db_path = 'dataset_small'
 
 	# Load existing representations
@@ -188,6 +189,9 @@ def delete(id):
 		pickle.dump(representations, f)
 
 	collection.delete_one({"id":id})
+
+	if os.path.exists(folder_path):
+		shutil.rmtree(folder_path)
 	
 	return redirect('/')
 
@@ -709,8 +713,8 @@ if __name__ == '__main__':
 	args = parser.parse_args()
 
 	#app.run(host='0.0.0.0', port=80,debug=False)
-	# app.run(host='0.0.0.0', port=args.port,debug=True,threaded=True)
-	app.run(host='192.168.0.106', port=5000,debug=True)
+	app.run(host='0.0.0.0', port=args.port,debug=False,threaded=True)
+	# app.run(host='192.168.0.106', port=5000,debug=True)
 	# app.run(host='0.0.0.0', port=args.port,debug=True)
 
 	# app.run( port=args.port,debug=True)
